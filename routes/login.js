@@ -19,13 +19,15 @@ let config = {
 };
 
 router.post('/', (req, res) => {
-    let email = req.body['email'];
+    let username = req.body['username'];
     let theirPw = req.body['password'];
     let wasSuccessful = false;
-    if(email && theirPw) {
+    if(username && theirPw) {
         //Using the 'one' method means that only one row should be returned
-        db.one('SELECT Password, Salt FROM Members WHERE Email=$1', [email])
+        db.one('SELECT Password, Salt FROM Members WHERE username=$1', [username])
         .then(row => { //If successful, run function passed into .then()
+            let active = row['activated']
+
             let salt = row['salt'];
             //Retrieve our copy of the password
             let ourSaltedHash = row['password']; 
@@ -36,25 +38,34 @@ router.post('/', (req, res) => {
             //Did our salted hash match their salted hash?
             let wasCorrectPw = ourSaltedHash === theirSaltedHash; 
 
-            if (wasCorrectPw) {
-                //credentials match. get a new JWT
-                let token = jwt.sign({username: email},
-                    config.secret,
-                    { 
-                        expiresIn: '24h' // expires in 24 hours
-                    }
-                );
-                //package and send the results
-                res.json({
-                    success: true,
-                    message: 'Authentication successful!',
-                    token: token
-                  });
-            } else {
-                //credentials dod not match
+            if (activated) {
+                if (wasCorrectPw) {
+                    //credentials match. get a new JWT
+                    let token = jwt.sign({username: username},
+                        config.secret,
+                        { 
+                            expiresIn: '24h' // expires in 24 hours
+                        }
+                    );
+                    //package and send the results
+                    res.json({
+                        success: true,
+                        message: 'Authentication successful!',
+                        token: token
+                    });
+                } else {
+                    //credentials dod not match
+                    res.send({
+                        success: false,
+                        message: 'credentials did not match'
+                    });
+                }
+            }
+            else {
+                //password not activated
                 res.send({
                     success: false,
-                    message: 'credentials did not match'
+                    message: 'please check your email'
                 });
             }
         })
