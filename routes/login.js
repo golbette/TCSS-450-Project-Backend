@@ -63,7 +63,9 @@ router.post('/', (req, res) => {
             //If anything happened, it wasn't successful
             res.send({
                 success: false,
-                message: 'unknown error'
+                message: 'unknown error',
+                error: err,
+                SentEmail: email
             });
         });
     } else {
