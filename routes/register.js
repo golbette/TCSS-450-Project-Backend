@@ -53,7 +53,7 @@ router.post('/', (req, res) => {
                 success: true
             });
             // Message is an html formatted string
-            let message = "Click <a href=\"https://blatherer.herokuapp.com/verify?id=" + verify + "&email=" + email + "\">here</a> to verify your account.";
+            let message = "Click <a href=\"https://blatherer-service.herokuapp.com/verify?id=" + verify + "&email=" + email + "\">here</a> to verify your account.";
             sendEmail("uwnetid@uw.edu", email, first + ", Welcome to Blatherer!", message);
         }).catch((err) => {
             //log the error
