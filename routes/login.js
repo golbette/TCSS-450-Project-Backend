@@ -63,7 +63,7 @@ router.post('/', (req, res) => {
             //If anything happened, it wasn't successful
             res.send({
                 success: false,
-                message: err
+                message: 'yeet'
             });
         });
     } else {
