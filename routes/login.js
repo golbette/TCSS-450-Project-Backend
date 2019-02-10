@@ -53,7 +53,8 @@ router.post('/', (req, res) => {
             } else {
                 //credentials dod not match
                 res.send({
-                    success: false 
+                    success: false,
+                    message: 'credentials did not match'
                 });
             }
         })
