@@ -11,12 +11,11 @@ app.use(bodyParser.json());
 
 
 
-app.use('/hello', require('./routes/hello.js'));
-app.use('/params', require('./routes/params.js'));
-app.use('/wait', require('./routes/wait.js'));
-app.use('/demosql', require('./routes/demosql.js'));
+
 app.use('/register', require('./routes/register.js'));
 app.use('/login', require('./routes/login.js'));
+app.use('/verify', require('./routes/verify.js'));
+
 
 /*
 * Hello world functions below...

@@ -35,17 +35,26 @@ router.post('/', (req, res) => {
         let salt = crypto.randomBytes(32).toString("hex");
         let salted_hash = getHash(password, salt);
         
+        // Generate "random" 20 character hex string
+        let hex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F'];
+        let verify = '', i;
+        for (i = 0; i < 20; i++) {
+            verify = verify + hex[Math.floor(Math.random() * 16)];
+        }
+        
         //Use .none() since no result gets returned from an INSERT in SQL
         //We're using placeholders ($1, $2, $3) in the SQL query string to avoid SQL Injection
         //If you want to read more: https://stackoverflow.com/a/8265319
-        let params = [first, last, username, email, salted_hash, salt];
-        db.none("INSERT INTO MEMBERS(FirstName, LastName, Username, Email, Password, Salt) VALUES ($1, $2, $3, $4, $5, $6)", params)
+        let params = [first, last, username, email, salted_hash, salt, verify];
+        db.none("INSERT INTO MEMBERS(FirstName, LastName, Username, Email, Password, Salt, VerificationHex) VALUES ($1, $2, $3, $4, $5, $6, $7)", params)
         .then(() => {
             //We successfully added the user, let the user know
             res.send({
                 success: true
             });
-            sendEmail("uwnetid@uw.edu", email, "Welcome!", "<strong>Welcome to our app!</strong>");
+            // Message is an html formatted string
+            let message = "Click <a href=\"https://blatherer.herokuapp.com/verify?id=" + verify + "&email=" + email + "\">here</a> to verify your account.";
+            sendEmail("uwnetid@uw.edu", email, first + ", Welcome to Blatherer!", message);
         }).catch((err) => {
             //log the error
             console.log(err);

@@ -14,6 +14,34 @@ function sendEmail(from, receiver, subj, message) {
 
   //fake sending an email for now. Post a message to logs. 
   console.log('Email sent: ' + message);
+
+  const nodemailer = require('nodemailer');
+
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'testlab850@gmail.com',
+            // Might want to add that password into the .env file 
+            // if we plan on using this account as the account
+            // that sends all the email verification links
+            pass: 'Test123$'
+        }
+    });
+
+    let mailOptions = {
+        from: 'testlab850@gmail.com',
+        to: receiver,
+        subject: subj,
+        html: message
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+            console.log(error);
+        } else {
+        console.log('Email sent: ' + info.response);
+        }
+    }); 
 }
 
 /**
