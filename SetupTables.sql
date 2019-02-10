@@ -6,8 +6,16 @@ CREATE TABLE Members (MemberID SERIAL PRIMARY KEY,
                       Email VARCHAR(255) NOT NULL UNIQUE,
                       Password VARCHAR(255) NOT NULL,
                       SALT VARCHAR(255),
-                      Verification INT DEFAULT 0
+                      Verification INT DEFAULT 0,
+                      Activated INT DEFAULT 0,
+                      VerificationHex VARCHAR(255)
 );
+--Added Activated column, if it's a 1, account
+--has clicked email verification link and is good to go
+
+--Added VerificationHex column, this contains the 20
+--character hex string as the "token" to verify
+--the new registered email
 
 DROP TABLE IF EXISTS Contacts;
 CREATE TABLE Contacts(PrimaryKey SERIAL PRIMARY KEY,
