@@ -75,8 +75,7 @@ router.post('/', (req, res) => {
             res.send({
                 success: false,
                 message: 'unknown error',
-                error: err,
-                SentEmail: email
+                error: err
             });
         });
     } else {
