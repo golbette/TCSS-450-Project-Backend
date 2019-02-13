@@ -57,7 +57,7 @@ router.post('/', (req, res) => {
                     //credentials dod not match
                     res.send({
                         success: false,
-                        message: 'credentials did not match'
+                        message: 'Credentials did not match'
                     });
                 }
             }
@@ -65,7 +65,7 @@ router.post('/', (req, res) => {
                 //password not activated
                 res.send({
                     success: false,
-                    message: 'please check your email'
+                    message: 'Please check your email'
                 });
             }
         })
@@ -74,14 +74,14 @@ router.post('/', (req, res) => {
             //If anything happened, it wasn't successful
             res.send({
                 success: false,
-                message: 'unknown error',
+                message: 'Credentials did not match',
                 error: err
             });
         });
     } else {
         res.send({
             success: false,
-            message: 'missing credentials'
+            message: 'Missing credentials'
         });
     }
 });
