@@ -10,11 +10,13 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
 
-
-
 app.use('/register', require('./routes/register.js'));
 app.use('/login', require('./routes/login.js'));
 app.use('/verify', require('./routes/verify.js'));
+
+/** Use middle ware after merged with master for testing */
+// app.use('/weather',middleware.checkToken ,require('./routes/weather.js'));
+app.use('/weather', require('./routes/weather.js'));
 
 
 /*
@@ -29,7 +31,6 @@ app.get("/hello", (req, res) => {
     message: "Hello, you sent a POST request"
     });
     })
-
         app.post("/demosql", (req, res) => {
             var name = req.body['name'];
         
@@ -74,11 +75,6 @@ app.get("/hello", (req, res) => {
                 })
             });
         });      
-
-
-
-
-
 
 /*
  * Return HTML for the / end point. 
