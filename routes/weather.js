@@ -77,7 +77,7 @@ router.get("/coordinates", (req, res) => {
  * Insert users weather locations into the DB. Nickname is the desired 
  * title the user give location. 
  */
-router.get('/get/location', (req, res) => {
+router.put('/location', (req, res) => {
     res.type("application/json");
    /** Parse data */
 
@@ -112,18 +112,22 @@ router.get('/get/location', (req, res) => {
     let params = [ memberID, nickname, zipcode];
     db.none("INSERT INTO LOCATIONS(MemberID, nickname, zip) VALUES ($1, $2, $3)", params)
         .then(() => {
-
-           res.send({
+        return res.send({
                 success: true,
                 msg: "Saved your location"
            });
         }).catch((err) => {
             console.log(err);
-            res.send({
+           return res.send({
                 success: false,
                 error: err
             });
         });
+    }).catch((err) => {
+            return res.send({
+                success: false, 
+                error: "Memebr Id not found"
+            });
     });
 });
 
@@ -131,7 +135,7 @@ router.get('/get/location', (req, res) => {
  * Insert users weather locations into the DB. Nickname is the desired 
  * title the user give location. 
  */
-router.get('/get/coordinates', (req, res) => {
+router.put('/coordinates', (req, res) => {
     res.type("application/json");
    /** Parse data */
 
@@ -173,18 +177,22 @@ router.get('/get/coordinates', (req, res) => {
     let params = [ memberID, nickname, lat, lon];
     db.none("INSERT INTO LOCATIONS(MemberID, nickname, lat, long) VALUES ($1, $2, $3, $4)", params)
         .then(() => {
-
-           res.send({
+          return res.send({
                 success: true,
                 msg: "Saved your location"
            });
         }).catch((err) => {
             console.log(err);
-            res.send({
+           return res.send({
                 success: false,
                 error: err
             });
         });
+    }).catch((err) => {
+        return res.send({
+            succes: false,
+            error: "Memebr Id not found"
+        })
     });
 });
 
@@ -192,7 +200,7 @@ router.get('/get/coordinates', (req, res) => {
  * Remove users saved location from DB, pass in 
  * username and nickname.
  */
-router.get('/remove', (req, res) => {
+router.delete('/location', (req, res) => {
     res.type("application/json");
    /** Parse data */
 
@@ -217,22 +225,75 @@ router.get('/remove', (req, res) => {
 
     var memberID = row['memberid'];
     
-    let params = [ memberID, nickname];
-    db.query("DELETE FROM LOCATIONS WHERE ((memberid=$1) AND (nickname=$2))" , [ memberID, nickname])
+    db.one("DELETE FROM LOCATIONS WHERE (memberid=$1) AND (nickname=$2) RETURNING *" , [ memberID, nickname])
         .then(() => {
-
-           res.send({
+            return res.send({
                 success: true,
                 msg: "Removed your location"
            });
         }).catch((err) => {
             console.log(err);
-            res.send({
+          return res.send({
                 success: false,
-                error: err
+                error: "You do not have a location saved under that nickname"
+            });
+        }).catch((err) =>{
+            res.send({
+                success: false, 
+                error: "Username not found"
             });
         });
+    }).catch((err) => {
+        res.send({
+            success: false, 
+            error: "Memebr Id not found"
+        })
     });
 });
+
+
+router.get('/location/users', (req, res) => {
+    res.type("application/json");
+   /** Parse data */
+
+   let username = req.query['username'];
+  
+   /**Information required to store users prefered location in DB. */
+   if(!username) {
+        return res.send({
+            success: false,
+            msg: "Username required"
+        });
+   } 
+        db.one('SELECT MemberID FROM Members WHERE Username=$1', [username])
+        .then(row => {
+
+        var memberID = row['memberid'];
+
+        db.many("SELECT * FROM LOCATIONS WHERE (memberid=$1)" , [memberID])
+        .then((data) => {
+``
+        res.send({
+                status: 'Success', 
+                data: data,
+                message: "Selected saved locations"
+        });
+    }).catch((err) =>{
+        res.send({
+            success: false, 
+            error: "Username not found"
+        });
+     });
+    }).catch((err) =>{
+        return res.send({
+            success: false, 
+            error: "Member Id not found"
+        })
+    });
+});
+
+
   
 module.exports = router;
+
+
