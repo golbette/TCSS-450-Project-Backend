@@ -5,11 +5,12 @@ const bodyParser = require("body-parser");
 router.use(bodyParser.json());
 let msg_functions = require('../utilities/util.js').messaging;
 
-// Send a message to all users "in" the clat session with chatId
+// Send a message to all users "in" the chat session with chatId
 router.post('/send', (req, res) => {
     let email = req.body['email'];
     let message = req.body['message'];
     let chatId = req.body['chatId'];
+    let 
     if (!email || !message || !chatId) {
         res.send({
             success:false,
@@ -17,16 +18,26 @@ router.post('/send', (req, res) => {
         })
         return;
     }
-    // Add the message to the database
-    let insert = 'INSERT INTO Messages(ChatId, Message, MemberId) SELECT $1, $2, MemberId From Members Where Email=$3';
-    db.none(insert, [chatId, message, email]).then(() => {
+    
+    //check if the chat exists. TODO: create a separate endpoint for creating a chat
+    let select = 'SELECT ChatId from Chats where ChatId = $1'
+    db.one(select, [chatId]).then((row => {
+
+        let insert = 'INSERT INTO Messages(ChatId, Message, MemberId) SELECT $1, $2, MemberId From Members Where Email=$3';
+        db.none(insert, [chatId, message, email]).then(() => {
         // Send a notification of this message to ALL members with registered tokens
-        db.manyOrNone('SELECT * FROM Push_Token').then(rows => {
-            rows.forEach(element => {
-                msg_functions.sendToIndividual(element['token'], message, email);
-            })
-            res.send({
-                success:true
+            db.manyOrNone('SELECT * FROM Push_Token').then(rows => {
+                rows.forEach(element => {
+                    msg_functions.sendToIndividual(element['token'], message, email);
+                })
+                res.send({
+                    success:true
+                })
+            }).catch(err => {
+                res.send({
+                    success:false,
+                    error:err
+                })
             })
         }).catch(err => {
             res.send({
@@ -34,12 +45,14 @@ router.post('/send', (req, res) => {
                 error:err
             })
         })
-    }).catch(err => {
+
+    })).catch(err => {
         res.send({
             success:false,
             error:err
         })
     })
+    
 })
 
 // Get all of the messages from a chat session with id chatId
