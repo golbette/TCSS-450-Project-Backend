@@ -13,6 +13,8 @@ app.use(bodyParser.json());
 app.use('/register', require('./routes/register.js'));
 app.use('/login', require('./routes/login.js'));
 app.use('/verify', require('./routes/verify.js'));
+app.use('/messaging', require('.routes/messaging.js'));
+
 
 /** Use middle ware after merged with master for testing */
 // app.use('/weather',middleware.checkToken ,require('./routes/weather.js'));
