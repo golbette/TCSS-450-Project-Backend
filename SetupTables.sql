@@ -49,12 +49,13 @@ CREATE TABLE Messages (PrimaryKey SERIAL PRIMARY KEY,
 );
 
 DROP TABLE IF EXISTS Locations;
-CREATE TABLE Locations (PrimaryKey SERIAL PRIMARY KEY,
-                        MemberID INT,
-                        Nickname VARCHAR(255),
+CREATE TABLE Locations (ID SERIAL,
+                        MemberID INT NOT NULL,
+                        Nickname VARCHAR(255) NOT NULL,
                         Lat DECIMAL,
                         Long DECIMAL,
                         ZIP INT,
+                        PRIMARY KEY(MemberID, Nickname),
                         FOREIGN KEY(MemberID) REFERENCES Members(MemberID)
 );
 
