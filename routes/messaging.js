@@ -55,6 +55,29 @@ router.post('/send', (req, res) => {
     
 })
 
+router.post('/create', (req, res) => {
+    let users = req.body['userIds'];
+    let chatId = req.body['chatId'];
+    let otherMemberId = req.body['otherMemberId'];
+
+    let query = 'INSERT INTO Chats($1, $2)'
+
+    for (i in users) {
+        db.none(query, [chatId, i]).then( () => {
+            res.send({
+                success:true
+            })
+        }).catch(err => {
+            res.send({
+                success:false,
+                error:err
+            })
+            
+        })
+    }
+
+})
+
 // Get all of the messages from a chat session with id chatId
 router.post('/getAll', (req, res) => {
     let chatId = req.body['chatId'];
