@@ -1,5 +1,5 @@
 const express = require('express');
-let db = require('../utilities/util.js').db;
+let db = require('../utilities/utils.js').db;
 var router = express.Router();
 const bodyParser = require("body-parser");
 router.use(bodyParser.json());
