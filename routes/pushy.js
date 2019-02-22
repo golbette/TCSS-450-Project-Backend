@@ -1,6 +1,6 @@
 const express = require('express');
-let db = require('../utilities/util.js').db;
-let getHash = require('../utilities/util.js').getHash;
+let db = require('../utilities/utils.js').db;
+let getHash = require('../utilities/utils.js').getHash;
 var router = express.Router();
 const bodyParser = require("body-parser");
 router.use(bodyParser.json());
