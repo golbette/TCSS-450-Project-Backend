@@ -54,10 +54,10 @@ router.post('/send', (req, res) => {
     
 })
 
+//create a new chat. Requires an array of userIds and a chatid
 router.post('/create', (req, res) => {
     let users = req.body['userIds'];
     let chatId = req.body['chatId'];
-    let otherMemberId = req.body['otherMemberId'];
 
     let query = 'INSERT INTO Chats($1, $2)'
 
@@ -69,7 +69,7 @@ router.post('/create', (req, res) => {
         }).catch(err => {
             res.send({
                 success:false,
-                error:err
+                error:err.message
             })
             
         })
