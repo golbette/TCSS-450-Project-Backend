@@ -10,7 +10,6 @@ router.post('/send', (req, res) => {
     let email = req.body['email'];
     let message = req.body['message'];
     let chatId = req.body['chatId'];
-    let 
     if (!email || !message || !chatId) {
         res.send({
             success:false,
