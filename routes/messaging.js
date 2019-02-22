@@ -3,7 +3,7 @@ let db = require('../utilities/utils.js').db;
 var router = express.Router();
 const bodyParser = require("body-parser");
 router.use(bodyParser.json());
-let msg_functions = require('../utilities/util.js').messaging;
+let msg_functions = require('../utilities/utils.js').messaging;
 
 // Send a message to all users "in" the chat session with chatId
 router.post('/send', (req, res) => {
