@@ -59,7 +59,7 @@ router.post('/create', (req, res) => {
     let users = req.body['userIds'];
     let chatId = req.body['chatId'];
 
-    let query = 'INSERT INTO Chats($1, $2)'
+    let query = 'INSERT INTO Chats(userId, chatId) VALUES ($1, $2)'
 
     for (i in users) {
         db.none(query, [chatId, i]).then( () => {
