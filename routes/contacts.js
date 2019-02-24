@@ -45,10 +45,10 @@ router.post('/approve', (req, res) => {
     let sender = req.body['MemberID_A'];
     let receiver = req.body['MemberID_B'];
 
-    let select = 'SELECT verified FROM CONTACTS where MemberID_B = $1 AND MemberID_A = $2';
+    let select = 'SELECT verified FROM CONTACTS WHERE MemberID_B = $1 AND MemberID_A = $2';
 
     db.one(select, [receiver, sender]).then(rows =>{
-        let update = 'UPDATE CONTACTS where MemberID_B = $1 AND MemberID_A = $2 SET verified = 1';
+        let update = 'UPDATE CONTACTS SET verified = 1 WHERE MemberID_B = $1 AND MemberID_A = $2 ';
 
         db.none(update, [receiver, sender]).then( () => {
 
