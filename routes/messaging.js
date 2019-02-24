@@ -18,11 +18,11 @@ router.post('/send', (req, res) => {
         return;
     }
     
-    //check if the chat exists. TODO: create a separate endpoint for creating a chat
+    //check if the chat exists
     let select = 'SELECT ChatId from Chats where ChatId = $1'
     db.one(select, [chatId]).then((row => {
 
-        let insert = 'INSERT INTO Messages(ChatId, Message, MemberId) SELECT $1, $2, MemberId From Members Where Email=$3';
+        let insert = 'INSERT INTO Messages(ChatId, Message, userId) SELECT $1, $2, userId From Members Where Email=$3';
         db.none(insert, [chatId, message, email]).then(() => {
         // Send a notification of this message to ALL members with registered tokens
             db.manyOrNone('SELECT * FROM Push_Token').then(rows => {
@@ -55,6 +55,8 @@ router.post('/send', (req, res) => {
 })
 
 //create a new chat. Requires an array of userIds and a chatid
+
+//TODO: Make sure that the creating user is contacts with other users
 router.post('/create', (req, res) => {
     let users = req.body['userIds'];
     let chatId = req.body['chatId'];
