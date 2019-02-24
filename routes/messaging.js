@@ -66,7 +66,7 @@ router.post('/create', (req, res) => {
     let allUsersVerified = 1;
         for (i in users) {
 
-            let checkContacts = 'SELECT verified FROM CONTACTS WHERE memberid_a=$1 AND memberid_b=$2 OR memberid_a=$2 AND memberid_b=$1'
+            let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)'
 
             db.one(checkContacts, [chatId, i]).then( rows => {
                 let verified = rows[verified];
@@ -78,7 +78,7 @@ router.post('/create', (req, res) => {
                 else {
                     res.send({
                         success:false,
-                        error:"Useres don't exist as contacts!",
+                        error:"Users don't exist as contacts!",
                         errMessage: "Users don't exist as contacts!"
                     })
                     return;
@@ -89,13 +89,13 @@ router.post('/create', (req, res) => {
                     success:false,
                     error:err.message,
                     errMessage:"Users don't exist as contacts!"
-                    
+
                 })
                 allUsersVerified = 0;
             })
         }
 
-        if (allUsersVerified == 1){
+    if (allUsersVerified == 1){
             db.none(insertChat, [chatId, i]).then (() => {
                 for (i in users) {
                     let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
@@ -111,10 +111,10 @@ router.post('/create', (req, res) => {
                     })
                 }
             })
-        }
+    }
 
         
-        })
+})
 
 // Get all of the messages from a chat session with id chatId
 router.post('/getAll', (req, res) => {
