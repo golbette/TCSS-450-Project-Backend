@@ -1,5 +1,6 @@
 //Get the connection to Heroku Database
 let db = require('./sql_conn.js');
+let messaging = require('./pushy_services.js');
 
 //We use this create the SHA256 hash
 const crypto = require("crypto");
@@ -55,5 +56,5 @@ function getHash(pw, salt) {
 }
 
 module.exports = { 
-    db, getHash, sendEmail
+    db, getHash, sendEmail, messaging
 };
