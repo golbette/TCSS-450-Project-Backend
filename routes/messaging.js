@@ -74,15 +74,12 @@ router.post('/create', (req, res) => {
 
                 if (verified != 1) {
                     allUsersVerified = 0;
-                }
-
-                else {
                     res.send({
                         success:false,
-                        error:"Users don't exist as contacts!",
-                        errMessage: "Users don't exist as contacts!"
+                        errMessage:"Users don't exist as contacts!",
+                        user1: initiatingUser,
+                        user2: users[i]
                     })
-                    return;
                 }
                     
             }).catch(err => {
@@ -91,7 +88,7 @@ router.post('/create', (req, res) => {
                     error:err.message,
                     errMessage:"Users don't exist as contacts!",
                     user1: initiatingUser,
-                    user2: i
+                    user2: users[i]
                 })
                 allUsersVerified = 0;
             })
