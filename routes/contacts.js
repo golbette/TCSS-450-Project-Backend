@@ -13,22 +13,17 @@ router.post('/request',  (req, res) => {
     let success = true;
 
 
-    db.one(select, [sender, receiver]).then(() =>{
-        res.send({
-            success:false,
-            error: "Request already exists!"
-        })
-        success = false;
-    })
-
-    if (success == false){
-        return;
-    }
-
-    db.none(insert, [sender, receiver]).then (() => {
-        db.one(select, [sender, receiver]).then(() => {
-            res.send({
-                success:true
+    db.none(select, [sender, receiver]).then(() =>{
+        db.none(insert, [sender, receiver]).then (() => {
+            db.one(select, [sender, receiver]).then(() => {
+                res.send({
+                    success:true
+                })
+            }).catch(err => {
+                res.send({
+                    success:false,
+                    error:err.message
+                })
             })
         }).catch(err => {
             res.send({
@@ -42,6 +37,8 @@ router.post('/request',  (req, res) => {
             error:err.message
         })
     })
+
+    
 })
 
 router.post('/approve', (req, res) => {
