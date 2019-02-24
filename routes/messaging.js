@@ -61,14 +61,18 @@ router.post('/create', (req, res) => {
     let users = req.body['userIds'];
     let chatId = req.body['chatId'];
 
+    let initiatingUser = users[0];
     let insertChat = 'INSERT INTO chats (chatid) VALUES ($1)';
+
+
 
     let allUsersVerified = 1;
         for (i in users) {
 
             let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)'
 
-            db.one(checkContacts, [chatId, i]).then( rows => {
+        if (i != initiatingUser){
+            db.one(checkContacts, [initiatingUser, i]).then( rows => {
                 let verified = rows[verified];
 
                 if (verified != 1) {
@@ -94,6 +98,7 @@ router.post('/create', (req, res) => {
                 allUsersVerified = 0;
             })
         }
+    }
 
     if (allUsersVerified == 1){
             db.none(insertChat, [chatId, i]).then (() => {
