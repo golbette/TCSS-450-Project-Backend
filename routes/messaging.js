@@ -69,7 +69,7 @@ router.post('/create', (req, res) => {
             db.one(checkContacts, [chatId, i]).then( rows => {
                 let verified = rows[verified];
 
-                if (verified == true) {
+                if (verified == 1) {
                     let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
                     db.none(insertMembers, [chatId, i]).then( () => {
                     res.send({
