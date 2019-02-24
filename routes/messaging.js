@@ -25,19 +25,19 @@ router.post('/send', (req, res) => {
         let insert = 'INSERT INTO Messages(ChatId, Message, userId) SELECT $1, $2, userId From Members Where Email=$3';
         db.none(insert, [chatId, message, email]).then(() => {
         // Send a notification of this message to ALL members with registered tokens
-            db.manyOrNone('SELECT * FROM Push_Token').then(rows => {
-                rows.forEach(element => {
-                    msg_functions.sendToIndividual(element['token'], message, email);
-                })
-                res.send({
-                    success:true
-                })
-            }).catch(err => {
-                res.send({
-                    success:false,
-                    error:err
-                })
-            })
+            //db.manyOrNone('SELECT * FROM Push_Token').then(rows => {
+            //    rows.forEach(element => {
+            //        msg_functions.sendToIndividual(element['token'], message, email);
+            //    })
+            //    res.send({
+            //       success:true
+            //    })
+           // }).catch(err => {
+           //     res.send({
+           //         success:false,
+           //         error:err
+           //     })
+           // })
         }).catch(err => {
             res.send({
                 success:false,
@@ -61,8 +61,9 @@ router.post('/create', (req, res) => {
     let users = req.body['userIds'];
     let chatId = req.body['chatId'];
 
-    let insertChat = 'INSERT INTO chats (chatid) VALUES ($1)'
-    db.none(insertChat, [chatId]).then( () => {
+    let insertChat = 'INSERT INTO chats (chatid) VALUES ($1)';
+
+    let allUsersVerified = 1;
         for (i in users) {
 
             let checkContacts = 'SELECT verified FROM CONTACTS WHERE memberid_a=$1 AND memberid_b=$2 OR memberid_a=$2 AND memberid_b=$1'
@@ -70,35 +71,44 @@ router.post('/create', (req, res) => {
             db.one(checkContacts, [chatId, i]).then( rows => {
                 let verified = rows[verified];
 
-                if (verified == 1) {
-                    let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
-                    db.none(insertMembers, [chatId, i]).then( () => {
+                if (verified != 1) {
+                    allUsersVerified = 0;
+                }
+
+                else {
                     res.send({
-                    success:true
-                    })
-                }).catch(err => {
-                    res.send({
-                     success:false,
-                     error:err.message
-                    })
-                
+                        success:false,
+                        error:"Useres don't exist as contacts!",
+                        errMessage: "Users don't exist as contacts!"
                     })
                 }
+                    
             }).catch(err => {
                 res.send({
                     success:false,
                     error:err.message,
                     errMessage:"Users don't exist as contacts!"
                 })
-            }) 
+            })
         }
-    }).catch(err=> {
-        res.send({
-            success:false,
-            error:err.message
+
+        //if we got here, all users must be contacts and verified
+        db.none(insertChat, [chatId, i]).then (() => {
+            for (i in users) {
+                let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
+                        db.none(insertMembers, [chatId, i]).then( () => {
+                        res.send({
+                        success:true
+                        })
+                    }).catch(err => {
+                        res.send({
+                         success:false,
+                         error:err.message
+                        })
+                    })
+                }
+            })
         })
-    })
-})
 
 // Get all of the messages from a chat session with id chatId
 router.post('/getAll', (req, res) => {
