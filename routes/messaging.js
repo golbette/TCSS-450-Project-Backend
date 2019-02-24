@@ -89,9 +89,14 @@ router.post('/create', (req, res) => {
                     success:false,
                     error:err.message,
                     errMessage:"Users don't exist as contacts!"
+                    
                 })
-                return;
+                allUsersVerified = 0;
             })
+        }
+
+        if (allUsersVerified == 0){
+            return;
         }
 
         //if we got here, all users must be contacts and verified

@@ -10,15 +10,20 @@ router.post('/request',  (req, res) => {
     let receiver = req.body['MemberID_B'];
     let insert = 'INSERT INTO Contacts(MemberID_A, MemberID_B, verified) VALUES ($1, $2, 0)';
     let select = 'SELECT * FROM Contacts WHERE MemberID_A = $1 AND MemberID_B = $2';
+    let success = true;
+
 
     db.one(select, [sender, receiver]).then(() =>{
         res.send({
             success:false,
             error: "Request already exists!"
-            
         })
-        return;
+        success = false;
     })
+
+    if (success == false){
+        return;
+    }
 
     db.none(insert, [sender, receiver]).then (() => {
         db.one(select, [sender, receiver]).then(() => {
@@ -28,8 +33,13 @@ router.post('/request',  (req, res) => {
         }).catch(err => {
             res.send({
                 success:false,
-                error:err
+                error:err.message
             })
+        })
+    }).catch(err => {
+        res.send({
+            success:false,
+            error:err.message
         })
     })
 })
