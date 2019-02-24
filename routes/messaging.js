@@ -70,13 +70,13 @@ router.post('/create', (req, res) => {
 
             if (i != initiatingUser){
             db.one(checkContacts, [initiatingUser,  users[i]]).then( rows => {
-                let verified = rows[verified];
+                let verified = row['verified'];
 
                 if (verified != 1) {
                     allUsersVerified = 0;
                 }
 
-                else {
+                else
                     res.send({
                         success:false,
                         error:"Users don't exist as contacts!",
