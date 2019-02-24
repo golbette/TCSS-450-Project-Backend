@@ -63,15 +63,12 @@ router.post('/create', (req, res) => {
 
     let initiatingUser = users[0];
     let insertChat = 'INSERT INTO chats (chatid) VALUES ($1)';
-
-
-
     let allUsersVerified = 1;
         for (i in users) {
 
-            let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)'
+            let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)';
 
-        if (i != initiatingUser){
+            if (i != initiatingUser){
             db.one(checkContacts, [initiatingUser, i]).then( rows => {
                 let verified = rows[verified];
 
@@ -92,13 +89,14 @@ router.post('/create', (req, res) => {
                 res.send({
                     success:false,
                     error:err.message,
-                    errMessage:"Users don't exist as contacts!"
-
+                    errMessage:"Users don't exist as contacts!",
+                    user1: initiatingUser,
+                    user2: i
                 })
                 allUsersVerified = 0;
             })
         }
-    }
+        }
 
     if (allUsersVerified == 1){
             db.none(insertChat, [chatId, i]).then (() => {
