@@ -24,7 +24,7 @@ app.use('/messaging', require('./routes/messaging.js'));
 app.use('/weather', require('./routes/weather.js'));
 
 
-/*N
+/*
 * Hello world functions below...
 */
 app.get("/hello", (req, res) => {
