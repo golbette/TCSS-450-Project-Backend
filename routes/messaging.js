@@ -81,6 +81,7 @@ router.post('/create', (req, res) => {
                         error:"Useres don't exist as contacts!",
                         errMessage: "Users don't exist as contacts!"
                     })
+                    return;
                 }
                     
             }).catch(err => {
@@ -89,6 +90,7 @@ router.post('/create', (req, res) => {
                     error:err.message,
                     errMessage:"Users don't exist as contacts!"
                 })
+                return;
             })
         }
 

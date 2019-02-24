@@ -15,7 +15,9 @@ router.post('/request',  (req, res) => {
         res.send({
             success:false,
             error: "Request already exists!"
+            
         })
+        return;
     })
 
     db.none(insert, [sender, receiver]).then (() => {
@@ -42,7 +44,7 @@ router.post('/approve', (req, res) => {
         let update = 'UPDATE CONTACTS where MemberID_B = $1 AND MemberID_A = $2 SET verified = 1';
 
         db.none(update, [receiver, sender]).then( () => {
-            
+
         })
     })
 })
