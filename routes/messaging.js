@@ -48,7 +48,8 @@ router.post('/send', (req, res) => {
     })).catch(err => {
         res.send({
             success:false,
-            error:err
+            error:err,
+            errorMsg:"chat does not exist!"
         })
     })
     
@@ -86,7 +87,8 @@ router.post('/create', (req, res) => {
             }).catch(err => {
                 res.send({
                     success:false,
-                    error:err.message
+                    error:err.message,
+                    errMessage:"Users don't exist as contacts!"
                 })
             }) 
         }
