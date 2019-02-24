@@ -56,27 +56,46 @@ router.post('/send', (req, res) => {
 
 //create a new chat. Requires an array of userIds and a chatid
 
-//TODO: Make sure that the creating user is contacts with other users
 router.post('/create', (req, res) => {
     let users = req.body['userIds'];
     let chatId = req.body['chatId'];
 
-    let query = 'INSERT INTO Chats(userId, chatId) VALUES ($1, $2)'
+    let insertChat = 'INSERT INTO chats (chatid) VALUES ($1)'
+    db.none(insertChat, [chatId]).then( () => {
+        for (i in users) {
 
-    for (i in users) {
-        db.none(query, [chatId, i]).then( () => {
-            res.send({
-                success:true
-            })
-        }).catch(err => {
-            res.send({
-                success:false,
-                error:err.message
-            })
-            
+            let checkContacts = 'SELECT verified FROM CONTACTS WHERE memberid_a=$1 AND memberid_b=$2 OR memberid_a=$2 AND memberid_b=$1'
+
+            db.one(checkContacts, [chatId, i]).then( rows => {
+                let verified = rows[verified];
+
+                if (verified == true) {
+                    let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
+                    db.none(insertMembers, [chatId, i]).then( () => {
+                    res.send({
+                    success:true
+                    })
+                }).catch(err => {
+                    res.send({
+                     success:false,
+                     error:err.message
+                    })
+                
+                    })
+                }
+            }).catch(err => {
+                res.send({
+                    success:false,
+                    error:err.message
+                })
+            }) 
+        }
+    }).catch(err=> {
+        res.send({
+            success:false,
+            error:err.message
         })
-    }
-
+    })
 })
 
 // Get all of the messages from a chat session with id chatId
