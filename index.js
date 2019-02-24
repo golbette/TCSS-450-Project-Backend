@@ -10,20 +10,20 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
 
+
+app.use('/hello', require('./routes/hello.js'));
+app.use('/params', require('./routes/params.js'));
+app.use('/wait', require('./routes/wait.js'));
+app.use('/demosql', require('./routes/demosql.js'));
 app.use('/register', require('./routes/register.js'));
 app.use('/login', require('./routes/login.js'));
+app.use('/contacts', require('./routes/contacts.js'));
 app.use('/verify', require('./routes/verify.js'));
 app.use('/pushy', require('./routes/pushy.js'));
 app.use('/messaging', require('./routes/messaging.js'));
-
-// app.use('/pushy', middleware.checkToken, require('./routes/pushy.js'));
-// app.use('/messaging', middleware.checkToken, require('./routes/messaging.js'));
-
-
 /** Use middle ware after merged with master for testing */
 // app.use('/weather',middleware.checkToken ,require('./routes/weather.js'));
 app.use('/weather', require('./routes/weather.js'));
-
 
 /*
 * Hello world functions below...
@@ -37,6 +37,7 @@ app.get("/hello", (req, res) => {
     message: "Hello, you sent a POST request"
     });
     })
+
         app.post("/demosql", (req, res) => {
             var name = req.body['name'];
         
@@ -81,6 +82,11 @@ app.get("/hello", (req, res) => {
                 })
             });
         });      
+
+
+
+
+
 
 /*
  * Return HTML for the / end point. 
