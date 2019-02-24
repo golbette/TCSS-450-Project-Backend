@@ -95,26 +95,25 @@ router.post('/create', (req, res) => {
             })
         }
 
-        if (allUsersVerified == 0){
-            return;
-        }
-
-        //if we got here, all users must be contacts and verified
-        db.none(insertChat, [chatId, i]).then (() => {
-            for (i in users) {
-                let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
-                        db.none(insertMembers, [chatId, i]).then( () => {
-                        res.send({
-                        success:true
-                        })
-                    }).catch(err => {
-                        res.send({
-                         success:false,
-                         error:err.message
+        if (allUsersVerified == 1){
+            db.none(insertChat, [chatId, i]).then (() => {
+                for (i in users) {
+                    let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
+                            db.none(insertMembers, [chatId, i]).then( () => {
+                            res.send({
+                            success:true
+                            })
+                        }).catch(err => {
+                            res.send({
+                             success:false,
+                             error:err.message
                         })
                     })
                 }
             })
+        }
+
+        
         })
 
 // Get all of the messages from a chat session with id chatId

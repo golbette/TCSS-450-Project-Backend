@@ -52,6 +52,20 @@ router.post('/approve', (req, res) => {
 
         db.none(update, [receiver, sender]).then( () => {
 
+            res.send({
+                success:true,
+            })
+
+        }).catch(err => {
+            res.send({
+                success:false,
+                error:err.message
+            })
+        })
+    }).catch(err => {
+        res.send({
+            success:false,
+            error:err.message
         })
     })
 })
