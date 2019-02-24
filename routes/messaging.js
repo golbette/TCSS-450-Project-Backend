@@ -96,10 +96,10 @@ router.post('/create', (req, res) => {
         }
 
     if (allUsersVerified == 1){
-            db.none(insertChat, [chatId, i]).then (() => {
+            db.none(insertChat, [chatId]).then (() => {
                 for (i in users) {
                     let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
-                            db.none(insertMembers, [chatId, i]).then( () => {
+                            db.none(insertMembers, [chatId, users[i]]).then( () => {
                             res.send({
                             success:true
                             })
