@@ -9,7 +9,7 @@ let db = require('../utilities/utils').db;
 
 let getHash = require('../utilities/utils').getHash;
 
-let sendEmail = require('../utilities/utils').sendEmail;
+let sendRegistrationEmail = require('../utilities/utils').sendRegistrationEmail;
 
 var router = express.Router();
 
@@ -54,7 +54,7 @@ router.post('/', (req, res) => {
             });
             // Message is an html formatted string
             let message = "Click <a href=\"https://blatherer-service.herokuapp.com/verify?id=" + verify + "&email=" + email + "\">here</a> to verify your account.";
-            sendEmail("uwnetid@uw.edu", email, first + ", Welcome to Blatherer!", message);
+            sendRegistrationEmail("uwnetid@uw.edu", email, first + ", Welcome to Blatherer!", message);
         }).catch((err) => {
             //log the error
             console.log(err);
