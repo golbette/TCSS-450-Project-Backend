@@ -137,10 +137,11 @@ router.post('/getAll', (req, res) => {
         db.one('select memberid from members where email=$1', [contactemail]).then(personB=>{
             db.one('select chatid from chatmembers where memberid=$1 INTERSECT select chatid from chatmembers where memberid=$2', [personA.memberid, personB.memberid]).then(row=>{
                 let chatId = parseInt(row.chatid);
-                let query = `SELECT Members.Username, Messages.Message, to_char(Messages.Timestamp AT TIME ZONE 'PDT', 'YYYY-MM-DD HH24:MI:SS.US') AS Timestamp FROM Messages INNER JOIN Members ON Messages.MemberId=Members.MemberId WHERE ChatId=$1 ORDER BY Timestamp ASC`;
+                let query = `SELECT Members.Username, Messages.chatid, Messages.Message, to_char(Messages.Timestamp AT TIME ZONE 'PDT', 'YYYY-MM-DD HH24:MI:SS.US') AS Timestamp FROM Messages INNER JOIN Members ON Messages.MemberId=Members.MemberId WHERE ChatId=$1 ORDER BY Timestamp ASC`;
                 db.any(query, [chatId]).then(rows => {
                     res.send({
-                        success:true, 
+                        success:true,
+                        chatid:chatId, 
                         message:rows
                     })
                 }).catch(err => {
