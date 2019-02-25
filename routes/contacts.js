@@ -75,7 +75,7 @@ router.get('/list', (req, res) => {
     db.one(getUserID, [user]).then(row => {
 
         let user = row['memberid']
-        db.noneOrMany(contactQuery, [user]).then(rows => {
+        db.manyOrNone(contactQuery, [user]).then(rows => {
             let members_a = rows['MemberID_A'];
             let members_b = rows['MemberID_B'];
             var contactIDs = [];
