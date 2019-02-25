@@ -16,9 +16,9 @@ router.post('/request',  (req, res) => {
     let getUserName = 'SELECT memberID FROM members WHERE username = $1'
 
     db.one(getUserName, [sender]).then(row => {
-        sender = row['memberID']
+        sender = row['memberid']
         db.one(getUserName, [receiver]).then(row => {
-            receiver = row['memberID']
+            receiver = row['memberid']
             db.none(select, [sender, receiver]).then(() =>{
                 db.none(insert, [sender, receiver]).then (() => {
                     db.one(select, [sender, receiver]).then(() => {
