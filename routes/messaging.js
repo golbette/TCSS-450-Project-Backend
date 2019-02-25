@@ -55,7 +55,7 @@ router.post('/send', (req, res) => {
     
 })
 
-//create a new chat. Requires an array of userIds and a chatid
+//create a new chat. Requires an array of usermnaesmess and a chatid
 
 router.post('/create', (req, res) => {
     let users = req.body['userIds'];
@@ -63,11 +63,12 @@ router.post('/create', (req, res) => {
     let insertChat = 'INSERT INTO chats (chatid) VALUES ($1)';
     let allUsersVerified = 1;
     let getUserID = 'SELECT memberID FROM members WHERE username = $1'
+    var userids = [];
         for (i in users) {
 
             //convert usernames to ids
             db.one(getUserID, users[i]).then( row => {
-                users[i] = row['memberid'];
+                userids[i] = row['memberid'];
             }).catch(err => {
                 res.send({
                     success:false,
@@ -76,8 +77,8 @@ router.post('/create', (req, res) => {
             })
 
             let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)';
-            if (users[i] != users[0]){
-            db.one(checkContacts, [users[0], users[i]]).then( row => {
+            if (userids[i] != userids[0]){
+            db.one(checkContacts, [userids[0], userids[i]]).then( row => {
                 let verified = row['verified'];
 
                 if (verified != 1) {
@@ -85,8 +86,8 @@ router.post('/create', (req, res) => {
                     res.send({
                         success:false,
                         errMessage:"Users don't exist as contacts!",
-                        user1: users[0],
-                        user2: users[i]
+                        user1: userids[0],
+                        user2: userids[i]
                     })
                 }
                     
@@ -96,8 +97,8 @@ router.post('/create', (req, res) => {
                     success:false,
                     error:err.message,
                     errMessage:"Users don't exist as contacts!",
-                    user1: users[0],
-                    user2: users[i]
+                    user1: userids[0],
+                    user2: userids[i]
                 })
                 
             })
@@ -106,9 +107,9 @@ router.post('/create', (req, res) => {
 
     if (allUsersVerified == 1){
             db.none(insertChat, [chatId]).then (() => {
-                for (i in users) {
+                for (i in userids) {
                     let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
-                            db.none(insertMembers, [chatId, users[i]]).then( () => {
+                            db.none(insertMembers, [chatId, userids[i]]).then( () => {
                             res.send({
                             success:true
                             })
