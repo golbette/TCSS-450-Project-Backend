@@ -28,13 +28,15 @@ router.post('/request',  (req, res) => {
                     }).catch(err => {
                         res.send({
                             success:false,
-                            error:err.message
+                            error:err.message,
+                            errorTime: 'checking addition'
                         })
                     })
                 }).catch(err => {
                     res.send({
                         success:false,
-                        error:err.message
+                        error:err.message,
+                        errorTime: 'creating addition'
                     })
                 })
             }).catch(err => {
@@ -46,13 +48,15 @@ router.post('/request',  (req, res) => {
         }).catch(err => {
             res.send({
                 success:false,
-                error:err.message
+                error:err.message,
+                errorTime: 'get receiver'
             })
         })
     }).catch(err => {
         res.send({
             success:false,
-            error:err.message
+            error:err.message,
+            errorTime: 'get sender'
         })
     })
 
