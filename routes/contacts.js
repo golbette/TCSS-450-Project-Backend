@@ -70,6 +70,7 @@ router.get('/list', (req, res) => {
     let contactQuery = 'SELECT memberid_a, memberid_b FROM CONTACTS WHERE (MemberID_A = $1 OR MemberID_B = $1) AND verified = 1';
     let user = req.body['Username'];
     var contactInfos = [];
+    var contactIDs = [];
     let getUserID = 'SELECT memberID FROM members WHERE username = $1'
 
     db.one(getUserID, [user]).then(row => {
@@ -78,7 +79,7 @@ router.get('/list', (req, res) => {
         db.manyOrNone(contactQuery, [user]).then(rows => {
             let members_a = rows['memberid_a'];
             let members_b = rows['memberid_b'];
-            var contactIDs = [];
+            
             
 
             let userNameQuery = 'SELECT username FROM members WHERE memberID = $1';
@@ -116,7 +117,8 @@ router.get('/list', (req, res) => {
 
         res.send({
             success:true,
-            usernames: contactInfos
+            usernames: contactInfos,
+            userids: contactIDs
         })
 
     }).catch(err => {
