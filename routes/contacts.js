@@ -118,7 +118,8 @@ router.get('/list', (req, res) => {
         res.send({
             success:true,
             usernames: contactInfos,
-            userids: contactIDs
+            userids: contactIDs,
+            requester: user
         })
 
     }).catch(err => {
