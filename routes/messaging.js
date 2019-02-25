@@ -55,26 +55,30 @@ router.post('/send', (req, res) => {
     
 })
 
-//create a new chat. Requires an array of userIds and a chatid
+//create a new chat. Requires an array of usermnaesmess and a chatid
 
 router.post('/create', (req, res) => {
     let users = req.body['userIds'];
     let chatId = req.body['chatId'];
-
-    let initiatingUser = users[0];
     let insertChat = 'INSERT INTO chats (chatid) VALUES ($1)';
     let allUsersVerified = 1;
     let getUserID = 'SELECT memberID FROM members WHERE username = $1'
+    var userids = [];
         for (i in users) {
 
             //convert usernames to ids
             db.one(getUserID, users[i]).then( row => {
-                user[i] = row['memberid'];
+                userids[i] = row['memberid'];
+            }).catch(err => {
+                res.send({
+                    success:false,
+                    error:err.message
+                })
             })
 
             let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)';
-            if (users[i] != initiatingUser){
-            db.one(checkContacts, [initiatingUser, users[i]]).then( row => {
+            if (userids[i] != userids[0]){
+            db.one(checkContacts, [userids[0], userids[i]]).then( row => {
                 let verified = row['verified'];
 
                 if (verified != 1) {
@@ -82,29 +86,30 @@ router.post('/create', (req, res) => {
                     res.send({
                         success:false,
                         errMessage:"Users don't exist as contacts!",
-                        user1: initiatingUser,
-                        user2: users[i]
+                        user1: userids[0],
+                        user2: userids[i]
                     })
                 }
                     
             }).catch(err => {
+                allUsersVerified = 0;
                 res.send({
                     success:false,
                     error:err.message,
                     errMessage:"Users don't exist as contacts!",
-                    user1: initiatingUser,
-                    user2: users[i]
+                    user1: userids[0],
+                    user2: userids[i]
                 })
-                allUsersVerified = 0;
+                
             })
         }
         }
 
     if (allUsersVerified == 1){
             db.none(insertChat, [chatId]).then (() => {
-                for (i in users) {
+                for (i in userids) {
                     let insertMembers = 'INSERT INTO chatMembers(chatid, memberid) VALUES ($1, $2)'
-                            db.none(insertMembers, [chatId, users[i]]).then( () => {
+                            db.none(insertMembers, [chatId, userids[i]]).then( () => {
                             res.send({
                             success:true
                             })
