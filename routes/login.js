@@ -19,12 +19,12 @@ let config = {
 };
 
 router.post('/', (req, res) => {
-    let username = req.body['username'];
+    let email = req.body['email'];
     let theirPw = req.body['password'];
     let wasSuccessful = false;
-    if(username && theirPw) {
+    if(email && theirPw) {
         //Using the 'one' method means that only one row should be returned
-        db.one('SELECT Password, Salt, Activated FROM Members WHERE username=$1', [username])
+        db.one('SELECT Password, Salt, Activated FROM Members WHERE email=$1', [email])
         .then(row => { //If successful, run function passed into .then()
             let active = row['activated']
 
@@ -41,7 +41,7 @@ router.post('/', (req, res) => {
             if (active === 1) {
                 if (wasCorrectPw) {
                     //credentials match. get a new JWT
-                    let token = jwt.sign({username: username},
+                    let token = jwt.sign({email: email},
                         config.secret,
                         { 
                             expiresIn: '24h' // expires in 24 hours
