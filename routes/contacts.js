@@ -73,12 +73,14 @@ router.get('/list', (req, res) => {
     var contactIDs = [];
     let getUserID = 'SELECT memberID FROM members WHERE username = $1'
 
+    var members_a;
+    var members_b;
     db.one(getUserID, [user]).then(row => {
 
         let user = row['memberid']
         db.manyOrNone(contactQuery, [user]).then(rows => {
-            let members_a = rows['memberid_a'];
-            let members_b = rows['memberid_b'];
+             members_a = rows['memberid_a'];
+             members_b = rows['memberid_b'];
             
             
 
@@ -119,7 +121,9 @@ router.get('/list', (req, res) => {
             success:true,
             usernames: contactInfos,
             userids: contactIDs,
-            requester: user
+            requester: user,
+            members1: members_a,
+            members2: members_b
         })
 
     }).catch(err => {
