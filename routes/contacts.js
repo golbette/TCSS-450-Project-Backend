@@ -76,8 +76,8 @@ router.get('/list', (req, res) => {
 
         let user = row['memberid']
         db.manyOrNone(contactQuery, [user]).then(rows => {
-            let members_a = rows['MemberID_A'];
-            let members_b = rows['MemberID_B'];
+            let members_a = rows['memberid_a'];
+            let members_b = rows['memberid_b'];
             var contactIDs = [];
             
 
