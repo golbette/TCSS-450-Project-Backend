@@ -35,7 +35,9 @@ router.post('/token', (req, res) => {
     } else {
         res.send({
             success:false,
-            message:"Missing email or token"
+            message:"Missing email or token",
+            email:email,
+            token:token
         })
     }
 })
