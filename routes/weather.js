@@ -58,7 +58,7 @@ router.get("/location", (req, res) => {
  * amde directions to dark sky alone. 
  * weather conditions in that. 
  */
-router.post("/hourly", (req, res) => {
+router.get("/hourly", (req, res) => {
 res.type("application/json");
 
 let desiredLat =  req.query['lat'];
