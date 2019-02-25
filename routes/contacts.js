@@ -74,7 +74,7 @@ router.get('/list', (req, res) => {
 
     db.one(getUserID, [user]).then(row => {
 
-        let user = row['memberID']
+        let user = row['memberid']
         db.noneOrMany(contactQuery, [user]).then(rows => {
             let members_a = rows['MemberID_A'];
             let members_b = rows['MemberID_B'];
@@ -139,9 +139,9 @@ router.post('/approve', (req, res) => {
     let getUserName = 'SELECT memberID FROM members WHERE username = $1'
 
     db.one(getUserName, [sender]).then( rows =>{
-        sender = rows[memberID]
+        sender = rows['memberid']
         db.one(getUserName, [receiver]).then ( rows => {
-            receiver = rows[memberID]
+            receiver = rows['memberid']
 
             db.one(select, [receiver, sender]).then(rows =>{
                 let update = 'UPDATE CONTACTS SET verified = 1 WHERE MemberID_B = $1 AND MemberID_A = $2 ';
