@@ -7,17 +7,17 @@ let msg_functions = require('../utilities/utils.js').messaging;
 
 // Send a message to all users "in" the chat session with chatId
 router.post('/send', (req, res) => {
-    let senderemail = req.body['email'];
+    let username = req.body['username'];
     let message = req.body['message'];
     let chatId = req.body['chatid'];
-    if (!senderemail || !message || !chatId) {
+    if (!username || !message || !chatId) {
         res.send({
             success:false,
-            error:'Email, message, or ChatID not supplied.'
+            error:'Username, message, or ChatID not supplied.'
         })
         return;
     }
-    db.one('select memberid from members where email=$1', [senderemail]).then(member=>{
+    db.one('select memberid from members where username=$1', [username]).then(member=>{
         //check if the chat exists
         let select = 'SELECT ChatId from Chats where ChatId = $1';
         db.one(select, [chatId]).then(row => {
