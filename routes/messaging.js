@@ -64,10 +64,15 @@ router.post('/create', (req, res) => {
     let initiatingUser = users[0];
     let insertChat = 'INSERT INTO chats (chatid) VALUES ($1)';
     let allUsersVerified = 1;
+    let getUserID = 'SELECT memberID FROM members WHERE username = $1'
         for (i in users) {
 
-            let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)';
+            //convert usernames to ids
+            db.one(getUserID, users[i]).then( row => {
+                user[i] = row['memberid'];
+            })
 
+            let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)';
             if (users[i] != initiatingUser){
             db.one(checkContacts, [initiatingUser, users[i]]).then( row => {
                 let verified = row['verified'];
