@@ -1,4 +1,9 @@
+const DARK_SKY_API = 'a574c79fa3aa8048944b142ee613a09b';
+
 const express = require('express');
+
+//request module is needed to make a request to a web service
+const requestDark = require('request');
 
 let db = require('../utilities/utils').db;
 var router = express.Router();
@@ -29,7 +34,6 @@ router.get("/location", (req, res) => {
     let desiredUnits = req.query['u'] || 'f';
     let desiredLocation = req.query['location'];
   
-
     request.get(  
     `https://weather-ydn-yql.media.yahoo.com/forecastrss?location=${desiredLocation}&u=${desiredUnits}&format=json`,
     null,
@@ -40,10 +44,76 @@ router.get("/location", (req, res) => {
         } else {
             res.type("application/json");
             res.send(data);
+
         }
     }
 );
 });
+
+/**
+ * Returns the 24 hr weather for desired coordindates or location.
+ * If location is passed in then first call is made to yahoo API 
+ * to retrieve the lat and long of that location then 
+ * To the dark sky. If the lat long are originally entered call is 
+ * amde directions to dark sky alone. 
+ * weather conditions in that. 
+ */
+router.post("/hourly", (req, res) => {
+res.type("application/json");
+
+let desiredLat =  req.query['lat'];
+let desiredLong = req.query['lon'];
+let desiredLocation = req.query['location'];
+let yahooURL =`https://weather-ydn-yql.media.yahoo.com/forecastrss?location=${desiredLocation}&format=json`;
+let darkSkyURL= `https://api.darksky.net/forecast/${process.env.DARK_SKY_WEATHER_API}`;
+
+if(desiredLocation) {
+
+   request.get(yahooURL, null, null, (err, data, result) =>{
+        if(err) {
+            return res.send({
+                succes: false,
+                msg: "Unable to connect using location"
+            });
+        } else {
+
+            desiredLat = JSON.parse(data).location.lat;
+            desiredLong = JSON.parse(data).location.long;
+            darkSkyURL += `/${desiredLat},${desiredLong}`;
+            console.log(darkSkyURL);
+            console.log(desiredLat, desiredLong);
+
+            requestDark.get(darkSkyURL, (err, response, body) => {
+                if(err){
+                    return res.send({
+                        success: false, 
+                        msg: "Unable to retrieve weather from try using lat lon"
+                    });
+                } else {
+                    res.send(JSON.parse(body));
+                }
+            }); 
+        }
+   });   
+ } else {
+     if(desiredLat && desiredLong) {
+    darkSkyURL += `/${desiredLat},${desiredLong}`;
+    requestDark.get(darkSkyURL, (err, response, body) => {
+            if(err){
+                return res.send({
+                    success: false, 
+                    msg: "Unable to retrieve weather from try using lat lon"
+                });
+            } else {
+                res.send(body);
+            }
+        }); 
+     }
+    } 
+});
+
+
+
 
 /**
  * Returns the weather for desired coordindates.
@@ -52,11 +122,23 @@ router.get("/location", (req, res) => {
  */
 router.get("/coordinates", (req, res) => {
 
-    res.type
+    
     let desiredLat = req.query['lat'];
     let desiredLong = req.query['lon'];
     let desiredUnits = req.query['u'] || 'f';
 
+    if(!desiredLat || isNaN(desiredLat)) {
+        return res.send({
+            success: false,
+            msg: "Latitude is required as a number"
+        });
+    } else if (!desiredLong|| isNaN(desiredLong)) {
+        return res.send({
+            succes: false,
+            msg: "Longitude is required as a number"
+ 
+        });
+    } 
     request.get(  
     `https://weather-ydn-yql.media.yahoo.com/forecastrss?lat=${desiredLat}&lon=${desiredLong}&u=${desiredUnits}&format=json`,
     null,
@@ -291,7 +373,6 @@ router.get('/location/users', (req, res) => {
         })
     });
 });
-
 
   
 module.exports = router;
