@@ -5,7 +5,7 @@ let messaging = require('./pushy_services.js');
 //We use this create the SHA256 hash
 const crypto = require("crypto");
 
-function sendEmail(from, receiver, subj, message) {
+async function sendEmail(from, receiver, subj, message) {
   //research nodemailer for sending email from node.
   // https://nodemailer.com/about/
   // https://www.w3schools.com/nodejs/nodejs_email.asp
@@ -21,22 +21,22 @@ function sendEmail(from, receiver, subj, message) {
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'testlab850@gmail.com',
+            user: 'blatherer.chat@gmail.com',
             // Might want to add that password into the .env file 
             // if we plan on using this account as the account
             // that sends all the email verification links
-            pass: 'Test123$'
+            pass: 'fuHcyc-vujfu0-rogdif'
         }
     });
 
     let mailOptions = {
-        from: 'testlab850@gmail.com',
+        from: 'blatherer.chat@gmail.com',
         to: receiver,
         subject: subj,
         html: message
     };
 
-    transporter.sendMail(mailOptions, function(error, info){
+  return await transporter.sendMail(mailOptions, function(error, info){
         if (error) {
             console.log(error);
         } else {
@@ -55,6 +55,28 @@ function getHash(pw, salt) {
     return crypto.createHash("sha256").update(pw + salt).digest("hex");
 }
 
+async function sendRegistrationEmail(from, receiver, subj, message) {
+let finalMessage = (`<html> 
+<head>
+<style>
+body {background-color: black;}
+h1   {color: #310a31;}
+p    {color: #847996;}
+</style></head>
+<body> 
+                <div> 
+                <h1>Welcome to Blatherer!</h1>
+                <p>To get started chatting click the link to verify your account.</p>
+                <p> ${message}</p>
+                </div> 
+                </body>  
+                </html>`);
+
+      return await sendEmail(from, receiver, subj, finalMessage);
+}
+
+
+
 module.exports = { 
-    db, getHash, sendEmail, messaging
+    db, getHash, sendEmail, messaging, sendRegistrationEmail
 };
