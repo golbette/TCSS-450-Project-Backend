@@ -27,7 +27,7 @@ router.post('/send', (req, res) => {
             // Send a notification of this message to involved members with registered tokens
                 db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1)', [chatId]).then(rows => {
                     rows.forEach(element => {
-                        msg_functions.sendToIndividual(element['token'], message, senderemail);
+                        msg_functions.sendToIndividual(element['token'], message, username);
                     })
                     res.send({
                         success:true,
@@ -133,14 +133,15 @@ router.post('/create', (req, res) => {
 router.post('/getAll', (req, res) => {
     let email = req.body['email'];
     let contactemail = req.body['contactemail'];
-    db.one('select memberid from members where email=$1', [email]).then(personA=>{
-        db.one('select memberid from members where email=$1', [contactemail]).then(personB=>{
+    db.one('select memberid, username from members where email=$1', [email]).then(personA=>{
+        db.one('select memberid, username from members where email=$1', [contactemail]).then(personB=>{
             db.one('select chatid from chatmembers where memberid=$1 INTERSECT select chatid from chatmembers where memberid=$2', [personA.memberid, personB.memberid]).then(row=>{
                 let chatId = parseInt(row.chatid);
                 let query = `SELECT Members.Username, Messages.chatid, Messages.Message, to_char(Messages.Timestamp AT TIME ZONE 'PDT', 'YYYY-MM-DD HH24:MI:SS.US') AS Timestamp FROM Messages INNER JOIN Members ON Messages.MemberId=Members.MemberId WHERE ChatId=$1 ORDER BY Timestamp ASC`;
                 db.any(query, [chatId]).then(rows => {
                     res.send({
                         success:true,
+                        username:personA.username,
                         chatid:chatId, 
                         message:rows
                     })
