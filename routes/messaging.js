@@ -68,6 +68,11 @@ router.post('/create', (req, res) => {
             //convert usernames to ids
             db.one(getUserID, users[i]).then( row => {
                 users[i] = row['memberid'];
+            }).catch(err => {
+                res.send({
+                    success:false,
+                    error:err.message
+                })
             })
 
             let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)';
