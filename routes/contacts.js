@@ -15,6 +15,21 @@ router.post('/searchcontacts', (req, res) => {
     })
 })
 
+router.post('/getusername', (req, res) => {
+    let email = req.body['email'];
+    db.one('select username from members where email=$1', [email]).then(row=>{
+        res.send({
+            success:true,
+            message:row
+        })
+    }).catch(err=>{
+        res.send({
+            success:false,
+            err:err.message
+        })
+    })
+})
+
 router.post('/getcontacts', (req, res) => {
     let email = req.body['email'];
     db.one('select memberid from members where email=$1', [email]).then(row => {
