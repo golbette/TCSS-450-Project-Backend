@@ -116,7 +116,7 @@ router.get('/list', (req, res) => {
                 error: err.message
             })
         })
-
+        
         res.send({
             success:true,
             usernames: contactInfos,
