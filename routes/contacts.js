@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 router.use(bodyParser.json());
 let msg_functions = require('../utilities/utils.js').messaging;
 
-router.get('/searchcontacts', (req, res) => {
+router.post('/searchcontacts', (req, res) => {
     let username = req.body['username'];
     db.one('select firstname, lastname, memberid from members where username = $1', [username]).then(row => {
         res.send({
@@ -15,7 +15,7 @@ router.get('/searchcontacts', (req, res) => {
     })
 })
 
-router.get('/getcontacts', (req, res) => {
+router.post('/getcontacts', (req, res) => {
     let email = req.body['email'];
     db.one('select memberid from members where email=$1', [email]).then(row => {
         db.any('select members.firstname, members.lastname, members.email, members.username from members where members.memberid = any (select memberid_b from contacts where memberid_a=$1 and verified = 1)', [row.memberid]).then(rows => {
@@ -41,7 +41,7 @@ router.get('/getcontacts', (req, res) => {
     })
 })
 
-router.get('/getconnreq', (req, res) => {
+router.post('/getconnreq', (req, res) => {
     let email = req.body['email'];
     db.one('select memberid from members where email = $1', [email]).then(row=>{
         db.any('select firstname, lastname, memberid from members where memberid = any (select memberid_a from contacts where memberid_b=$1)', [row.memberid]).then(rows=>{
