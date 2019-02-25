@@ -60,8 +60,6 @@ router.post('/send', (req, res) => {
 router.post('/create', (req, res) => {
     let users = req.body['userIds'];
     let chatId = req.body['chatId'];
-
-    let initiatingUser = users[0];
     let insertChat = 'INSERT INTO chats (chatid) VALUES ($1)';
     let allUsersVerified = 1;
     let getUserID = 'SELECT memberID FROM members WHERE username = $1'
@@ -72,7 +70,7 @@ router.post('/create', (req, res) => {
                 users[i] = row['memberid'];
             })
 
-            initiatingUser = users[0];
+            let initiatingUser = users[0];
 
             let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)';
             if (users[i] != initiatingUser){
@@ -90,6 +88,7 @@ router.post('/create', (req, res) => {
                 }
                     
             }).catch(err => {
+                allUsersVerified = 0;
                 res.send({
                     success:false,
                     error:err.message,
@@ -97,7 +96,7 @@ router.post('/create', (req, res) => {
                     user1: initiatingUser,
                     user2: users[i]
                 })
-                allUsersVerified = 0;
+                
             })
         }
         }
