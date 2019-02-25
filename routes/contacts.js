@@ -73,16 +73,15 @@ router.get('/list', (req, res) => {
     var contactIDs = [];
     let getUserID = 'SELECT memberID FROM members WHERE username = $1'
 
-    var members_a;
-    var members_b;
     db.one(getUserID, [user]).then(row => {
 
         let user = row['memberid']
         db.manyOrNone(contactQuery, [user]).then(rows => {
-             members_a = rows['memberid_a'];
-             members_b = rows['memberid_b'];
+            let members_a = rows['memberid_a'];
+            let members_b = rows['memberid_b'];
             
-            
+            console.log(members_a);
+            console.log(members_b);
 
             let userNameQuery = 'SELECT username FROM members WHERE memberID = $1';
 
@@ -116,14 +115,12 @@ router.get('/list', (req, res) => {
                 error: err.message
             })
         })
-        
+
         res.send({
             success:true,
             usernames: contactInfos,
             userids: contactIDs,
             requester: user,
-            members1: members_a,
-            members2: members_b
         })
 
     }).catch(err => {
