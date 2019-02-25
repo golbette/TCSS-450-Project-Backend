@@ -82,6 +82,7 @@ router.get('/list', (req, res) => {
             
             console.log(members_a);
             console.log(members_b);
+            console.log(rows);
 
             let userNameQuery = 'SELECT username FROM members WHERE memberID = $1';
 
