@@ -72,6 +72,8 @@ router.post('/create', (req, res) => {
                 users[i] = row['memberid'];
             })
 
+            initiatingUser = users[0];
+
             let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)';
             if (users[i] != initiatingUser){
             db.one(checkContacts, [initiatingUser, users[i]]).then( row => {
