@@ -70,8 +70,6 @@ router.post('/create', (req, res) => {
                 users[i] = row['memberid'];
             })
 
-            let initiatingUser = users[0];
-
             let checkContacts = 'SELECT verified FROM CONTACTS WHERE (memberid_a=$1 AND memberid_b=$2) OR (memberid_a=$2 AND memberid_b=$1)';
             if (users[i] != initiatingUser){
             db.one(checkContacts, [initiatingUser, users[i]]).then( row => {
@@ -82,7 +80,7 @@ router.post('/create', (req, res) => {
                     res.send({
                         success:false,
                         errMessage:"Users don't exist as contacts!",
-                        user1: initiatingUser,
+                        user1: users[0],
                         user2: users[i]
                     })
                 }
@@ -93,7 +91,7 @@ router.post('/create', (req, res) => {
                     success:false,
                     error:err.message,
                     errMessage:"Users don't exist as contacts!",
-                    user1: initiatingUser,
+                    user1: users[0],
                     user2: users[i]
                 })
                 
