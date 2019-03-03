@@ -24,13 +24,15 @@ router.post('/', (req, res) => {
     let wasSuccessful = false;
     if(email && theirPw) {
         //Using the 'one' method means that only one row should be returned
-        db.one('SELECT Password, Salt, Activated FROM Members WHERE email=$1', [email])
+        db.one('SELECT Password, Salt, Activated, Username FROM Members WHERE email=$1', [email])
         .then(row => { //If successful, run function passed into .then()
             let active = row['activated']
 
             let salt = row['salt'];
             //Retrieve our copy of the password
             let ourSaltedHash = row['password']; 
+
+            let username = row['username'];
             
             //Combined their password with our salt, then hash
             let theirSaltedHash = getHash(theirPw, salt); 
@@ -51,7 +53,8 @@ router.post('/', (req, res) => {
                     res.json({
                         success: true,
                         message: 'Authentication successful!',
-                        token: token
+                        token: token,
+                        username: username
                     });
                 } else {
                     //credentials dod not match
