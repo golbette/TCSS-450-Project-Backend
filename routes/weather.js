@@ -363,7 +363,7 @@ router.get('/location/users', (req, res) => {
         });
     }).catch((err) =>{
         res.send({
-            success: false, 
+            status: 'No Success', 
             error: "Username not found"
         });
      });
