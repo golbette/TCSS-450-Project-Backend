@@ -74,9 +74,10 @@ router.post('/getcontacts', (req, res) => {
  * and pass in a int for 'pending' to return the requests that user has 
  * sent. 
  */
-router.post('/getconnreq', (req, res) => {
-    let email = req.body['email'];
-    let pending = req.body['pending'];
+router.get('/getconnreq', (req, res) => {
+    res.type("application/json");
+    let email = req.query['email'];
+    let pending = req.query['pending'];
 
     if(!pending){
   
