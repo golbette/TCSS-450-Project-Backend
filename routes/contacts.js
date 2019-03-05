@@ -22,7 +22,7 @@ router.post('/getusername', (req, res) => {
             success:true,
             message:row
         })
-    }).catch(err=>{
+    }).catch(err=> {
         res.send({
             success:false,
             err:err.message
@@ -56,15 +56,34 @@ router.post('/getcontacts', (req, res) => {
     })
 })
 
+/**
+ * Get pending connection requests. 
+ * just pass in the email to see who sent the user a request 
+ * and pass in a int for 'pending' to return the requests that user has 
+ * sent. 
+ */
 router.post('/getconnreq', (req, res) => {
     let email = req.body['email'];
-    db.one('select memberid from members where email = $1', [email]).then(row=>{
-        db.any('select firstname, lastname, memberid from members where memberid = any (select memberid_a from contacts where memberid_b=$1)', [row.memberid]).then(rows=>{
+    let pending = req.body['pending'];
+
+    if(!pending){
+  
+    db.one(`select memberid from members where email = $1`, [email]).then(row => {
+        console.log(email);
+        console.log(row);
+        db.many(`SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
+        FROM Members
+        JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_b = $1 AND verified = 0) as C
+        ON memberid_a = memberid`, 
+        [row['memberid']]).then(rows => {
+            console.log(rows);
             res.send({
                 success:true,
                 message:rows
+                
             })
         }).catch(err => {
+            console.log(err);
             res.send({
                 success:false, 
                 message:'You are all caught up!'
@@ -76,11 +95,44 @@ router.post('/getconnreq', (req, res) => {
             message:'Member DNE'
         })
     })
+} else {
+    db.one(`select memberid from members where email = $1`, [email]).then(row => {
+        console.log(email);
+        console.log(row);
+        db.many(`SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
+        FROM Members
+        JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_a = $1 AND verified = 0) as C
+        ON memberid_b = memberid`, 
+        [row['memberid']]).then(rows => {
+            console.log(rows);
+            res.send({
+                success:true,
+                message:rows
+                
+            })
+        }).catch(err => {
+            console.log(err);
+            res.send({
+                success:false, 
+                message:'You are all caught up!'
+            })
+        })
+    }).catch(err=>{
+        res.send({
+            success:false,
+            message:'Member DNE'
+        })
+    })
+}
 })
 
+/**
+ * Pass in email of user and member id 
+ * of desired friend to request contact. 
+ */
 router.post('/request',  (req, res) => {
     let email = req.body['email'];
-    let receiver = req.body['MemberID_B'];
+    let receiver = req.body['memberid_b']; 
     db.one('select memberid from members where email = $1', [email]).then(row=>{
         let sender = row.memberid;
         let insert = 'INSERT INTO Contacts(MemberID_A, MemberID_B, verified) VALUES ($1, $2, 0)';
@@ -125,7 +177,7 @@ router.post('/request',  (req, res) => {
 
 router.get('/list', (req, res) => {
     let contactQuery = 'SELECT memberid_a, memberid_b FROM CONTACTS WHERE (MemberID_A = $1 OR MemberID_B = $1) AND verified = 1';
-    let user = req.body['Username'];
+    let user = req.body['username'];
     var contactInfos = [];
     var contactIDs = [];
     let getUserID = 'SELECT memberID FROM members WHERE username = $1'
@@ -187,9 +239,6 @@ router.get('/list', (req, res) => {
             error:err.message
         })
     })
-
-        
-
 })
 
 
