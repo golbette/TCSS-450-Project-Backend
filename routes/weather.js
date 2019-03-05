@@ -90,7 +90,8 @@ if(desiredLocation) {
                         msg: "Unable to retrieve weather from try using lat lon"
                     });
                 } else {
-                    res.send(JSON.parse(body));
+                    
+                    res.send(body.array());
                 }
             }); 
         }
