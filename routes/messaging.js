@@ -27,7 +27,7 @@ router.post('/send', (req, res) => {
             // Send a notification of this message to involved members with registered tokens
                 db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1)', [chatId]).then(rows => {
                     rows.forEach(element => {
-                        msg_functions.sendToIndividual(element['token'], message, username);
+                        msg_functions.sendToIndividual(element['token'], message, username, chatId);
                     })
                     res.send({
                         success:true,
@@ -61,7 +61,6 @@ router.post('/send', (req, res) => {
 })
 
 //create a new chat. Requires an array of usermnaesmess and a chatid
-
 router.post('/create', (req, res) => {
     let users = req.body['userIds'];
     let chatId = req.body['chatId'];
@@ -132,9 +131,9 @@ router.post('/create', (req, res) => {
 // Get all of the messages from a chat session with id chatId
 router.post('/getAll', (req, res) => {
     let email = req.body['email'];
-    let contactusername = req.body['contactusername'];
+    let chatId = req.body['chatid'];
     let contactemail = req.body['contactemail'];
-    if (!contactusername && contactemail) {
+    if (contactemail) {
         db.one('select memberid, username from members where email=$1', [email]).then(personA=>{
             db.one('select memberid, username from members where email=$1', [contactemail]).then(personB=>{
                 db.one('select chatid from chatmembers where memberid=$1 INTERSECT select chatid from chatmembers where memberid=$2', [personA.memberid, personB.memberid]).then(row=>{
@@ -173,44 +172,20 @@ router.post('/getAll', (req, res) => {
                 message:"Person A memberid not found."
             })
         })
-
-    } else if (!contactemail && contactusername){
-        db.one('select memberid, username from members where email=$1', [email]).then(personA=>{
-            db.one('select memberid, username from members where username=$1', [contactusername]).then(personB=>{
-                db.one('select chatid from chatmembers where memberid=$1 INTERSECT select chatid from chatmembers where memberid=$2', [personA.memberid, personB.memberid]).then(row=>{
-                    let chatId = parseInt(row.chatid);
-                    let query = `SELECT Members.Username, Messages.chatid, Messages.Message, to_char(Messages.Timestamp AT TIME ZONE 'PDT', 'YYYY-MM-DD HH24:MI:SS.US') AS Timestamp FROM Messages INNER JOIN Members ON Messages.MemberId=Members.MemberId WHERE ChatId=$1 ORDER BY Timestamp ASC`;
-                    db.any(query, [chatId]).then(rows => {
-                        res.send({
-                            success:true,
-                            username:personA.username,
-                            chatid:chatId, 
-                            message:rows
-                        })
-                    }).catch(err => {
-                        res.send({
-                            success:false,
-                            message:"Have no chat records.",
-                            chatid:chatId,
-                            error:err
-                        })
-                    })
-                }).catch(err=>{
-                    res.send({
-                        success:false, 
-                        message:"You have not started a chatroom together."
-                    })
-                })
-            }).catch(err=>{
-                res.send({
-                    success:false,
-                    message:"Person B memberid not found."
-                })
+    } else if (!contactemail && chatId){
+        let query = `SELECT Members.Username, Messages.chatid, Messages.Message, to_char(Messages.Timestamp AT TIME ZONE 'PDT', 'YYYY-MM-DD HH24:MI:SS.US') AS Timestamp FROM Messages INNER JOIN Members ON Messages.MemberId=Members.MemberId WHERE ChatId=$1 ORDER BY Timestamp ASC`;
+        db.any(query, [chatId]).then(rows => {
+            res.send({
+                success:true,
+                chatid:chatId, 
+                message:rows
             })
-        }).catch(err=>{
+        }).catch(err => {
             res.send({
                 success:false,
-                message:"Person A memberid not found."
+                message:"Have no chat records. Get messages with chat id failed",
+                chatid:chatId,
+                error:err
             })
         })
     }

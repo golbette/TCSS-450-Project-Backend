@@ -2,18 +2,19 @@ var Pushy = require('pushy');
 var pushyAPI = new Pushy(process.env.PUSHY_API_KEY);
 
 // Use to send message to all clients registered to a Topic
-function sendToTopic(topic, msg, from) {
+function sendToTopic(topic, msg, from, chatId) {
     var data = {
         "type":"topic_msg",
         "sender":from, 
-        "message":msg
+        "message":msg,
+        "chatid":chatId
     }
     console.log(data);
     to = '/topics/' + topic;
 
     // Send push notification via the Send Notifications API
     // https://pushy.me/docs/api/send-notifications
-    pushyAPI.sendPushNotification(data, to, {}, function(err, id) { // Same as (err, id)) => {} ?
+    pushyAPI.sendPushNotification(data, to, {}, function(err, id) {
         if (err) {
             return console.log('Fatal Error', err);
         }
@@ -22,14 +23,15 @@ function sendToTopic(topic, msg, from) {
 }
 
 // Use to send message to a specific client by the token
-function sendToIndividual(token, msg, from) {
+function sendToIndividual(token, msg, from, chatId) {
     var data = {
         "type":"msg",
         "sender":from,
-        "message":msg
+        "message":msg, 
+        "chatid":chatId
     }
     console.log(data);
-    pushyAPI.sendPushNotification(data, token, {}, function(err, id) { // Same as (err, id)) => {} ?
+    pushyAPI.sendPushNotification(data, token, {}, function(err, id) {
         if (err) {
             return console.log('Fatal Error', err);
         }
