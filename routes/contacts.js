@@ -6,11 +6,23 @@ router.use(bodyParser.json());
 let msg_functions = require('../utilities/utils.js').messaging;
 
 router.post('/searchcontacts', (req, res) => {
-    let username = req.body['username'];
-    db.one('select firstname, lastname, memberid from members where username = $1', [username]).then(row => {
+    let input = req.body['input'];
+    db.any(`select memberid, firstname, lastname, username, email from members where email LIKE '%'||$1||'%' OR firstname LIKE '%'||$1||'%' OR lastname LIKE '%'||$1||'%' or username LIKE '%'||$1||'%'`, [input]).then(rows => {
+        if (rows.length === 0) {
+            res.send({
+                success:true,
+                message:'No Results'
+            })
+        } else {
+            res.send({
+                success:true, 
+                message:rows
+            })
+        }
+    }).catch(err => {
         res.send({
-            success:true,
-            message:row
+            success:false,
+            message:'Caught: ' + err.message
         })
     })
 })
