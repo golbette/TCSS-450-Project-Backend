@@ -225,7 +225,7 @@ router.put('/coordinates', (req, res) => {
    let username = req.query['username'];
    let lat = req.query['lat'];
    let lon = req.query['lon'];
-   let nickname = req.query['nickname'] || zipcode;
+   let nickname = req.query['nickname'];
   
    /**Information required to store users prefered location in DB. */
    if(!username) {
@@ -363,7 +363,7 @@ router.get('/location/users', (req, res) => {
         });
     }).catch((err) =>{
         res.send({
-            success: false, 
+            status: 'No Success', 
             error: "Username not found"
         });
      });
