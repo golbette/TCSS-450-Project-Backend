@@ -55,7 +55,7 @@ router.get("/location", (req, res) => {
  * If location is passed in then first call is made to yahoo API 
  * to retrieve the lat and long of that location then 
  * To the dark sky. If the lat long are originally entered call is 
- * amde directions to dark sky alone. 
+ * made directions to dark sky alone. 
  * weather conditions in that. 
  */
 router.get("/hourly", (req, res) => {
@@ -112,9 +112,6 @@ if(desiredLocation) {
      }
     } 
 });
-
-
-
 
 /**
  * Returns the weather for desired coordindates.

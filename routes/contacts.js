@@ -6,11 +6,23 @@ router.use(bodyParser.json());
 let msg_functions = require('../utilities/utils.js').messaging;
 
 router.post('/searchcontacts', (req, res) => {
-    let username = req.body['username'];
-    db.one('select firstname, lastname, memberid from members where username = $1', [username]).then(row => {
+    let input = req.body['input'];
+    db.any(`select memberid, firstname, lastname, username, email from members where email LIKE '%'||$1||'%' OR firstname LIKE '%'||$1||'%' OR lastname LIKE '%'||$1||'%' or username LIKE '%'||$1||'%'`, [input]).then(rows => {
+        if (rows.length === 0) {
+            res.send({
+                success:true,
+                message:'No Results'
+            })
+        } else {
+            res.send({
+                success:true, 
+                message:rows
+            })
+        }
+    }).catch(err => {
         res.send({
-            success:true,
-            message:row
+            success:false,
+            message:'Caught: ' + err.message
         })
     })
 })
@@ -22,7 +34,7 @@ router.post('/getusername', (req, res) => {
             success:true,
             message:row
         })
-    }).catch(err=>{
+    }).catch(err=> {
         res.send({
             success:false,
             err:err.message
@@ -58,15 +70,35 @@ router.post('/getcontacts', (req, res) => {
     })
 })
 
-router.post('/getconnreq', (req, res) => {
-    let email = req.body['email'];
-    db.one('select memberid from members where email = $1', [email]).then(row=>{
-        db.any('select firstname, lastname, memberid from members where memberid = any (select memberid_a from contacts where memberid_b=$1)', [row.memberid]).then(rows=>{
+/**
+ * Get pending connection requests. 
+ * just pass in the email to see who sent the user a request 
+ * and pass in a int for 'pending' to return the requests that user has 
+ * sent. 
+ */
+router.get('/getconnreq', (req, res) => {
+    res.type("application/json");
+    let email = req.query['email'];
+    let pending = req.query['pending'];
+
+    if(!pending){
+  
+    db.one(`select memberid from members where email = $1`, [email]).then(row => {
+        console.log(email);
+        console.log(row);
+        db.many(`SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
+        FROM Members
+        JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_b = $1 AND verified = 0) as C
+        ON memberid_a = memberid`, 
+        [row['memberid']]).then(rows => {
+            console.log(rows);
             res.send({
                 success:true,
                 message:rows
+                
             })
         }).catch(err => {
+            console.log(err);
             res.send({
                 success:false, 
                 message:'You are all caught up!'
@@ -78,6 +110,35 @@ router.post('/getconnreq', (req, res) => {
             message:'Member DNE'
         })
     })
+} else {
+    db.one(`select memberid from members where email = $1`, [email]).then(row => {
+        console.log(email);
+        console.log(row);
+        db.many(`SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
+        FROM Members
+        JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_a = $1 AND verified = 0) as C
+        ON memberid_b = memberid`, 
+        [row['memberid']]).then(rows => {
+            console.log(rows);
+            res.send({
+                success:true,
+                message:rows
+                
+            })
+        }).catch(err => {
+            console.log(err);
+            res.send({
+                success:false, 
+                message:'You are all caught up!'
+            })
+        })
+    }).catch(err=>{
+        res.send({
+            success:false,
+            message:'Member DNE'
+        })
+    })
+}
 })
 
 router.post('/connReq',  (req, res) => {
