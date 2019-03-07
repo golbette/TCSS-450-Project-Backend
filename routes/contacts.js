@@ -5,9 +5,14 @@ const bodyParser = require("body-parser");
 router.use(bodyParser.json());
 let msg_functions = require('../utilities/utils.js').messaging;
 
+/**
+ * Searche within the members database for tuples that matches the input. 
+ * Username, First Name, Last Name, and Email are accepted as input.
+ */
 router.post('/searchcontacts', (req, res) => {
     let input = req.body['input'];
-    db.any(`select memberid, firstname, lastname, username, email from members where email LIKE '%'||$1||'%' OR firstname LIKE '%'||$1||'%' OR lastname LIKE '%'||$1||'%' or username LIKE '%'||$1||'%'`, [input]).then(rows => {
+    let email = req.body['email'];
+    db.any(`select memberid, firstname, lastname, username, email from members where email LIKE '%'||$1||'%' OR firstname LIKE '%'||$1||'%' OR lastname LIKE '%'||$1||'%' or username LIKE '%'||$1||'%' AND email != $2`, [input, email]).then(rows => {
         if (rows.length === 0) {
             res.send({
                 success:true,
@@ -27,6 +32,9 @@ router.post('/searchcontacts', (req, res) => {
     })
 })
 
+/**
+ * Returns the username of the member given their email.
+ */
 router.post('/getusername', (req, res) => {
     let email = req.body['email'];
     db.one('select username from members where email=$1', [email]).then(row=>{
@@ -42,6 +50,9 @@ router.post('/getusername', (req, res) => {
     })
 })
 
+/**
+ * Returns all of the contacts of the user.
+ */
 router.post('/getcontacts', (req, res) => {
     let email = req.body['email'];
     db.one('select memberid from members where email=$1', [email]).then(row => {
