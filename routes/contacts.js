@@ -12,7 +12,7 @@ let msg_functions = require('../utilities/utils.js').messaging;
 router.post('/searchcontacts', (req, res) => {
     let input = req.body['input'];
     let email = req.body['email'];
-    db.any(`select memberid, firstname, lastname, username, email from members where email LIKE '%'||$1||'%' OR firstname LIKE '%'||$1||'%' OR lastname LIKE '%'||$1||'%' or username LIKE '%'||$1||'%' AND email != $2`, [input, email]).then(rows => {
+    db.any(`select memberid, firstname, lastname, username, email from members where email LIKE '%'||$1||'%' OR firstname LIKE '%'||$1||'%' OR lastname LIKE '%'||$1||'%' or username LIKE '%'||$1||'%' except select memberid, firstname, lastname, username, email from members where email = $2`, [input, email]).then(rows => {
         if (rows.length === 0) {
             res.send({
                 success:true,
