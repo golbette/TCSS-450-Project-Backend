@@ -432,10 +432,10 @@ router.post('/convoReqReceived', (req, res) => {
     ON M.chatid = C.chatid
     JOIN (SELECT memberid, firstname, lastname, username, email FROM members) as U
     ON U.memberid = M.memberid`;
-    let getUserID = 'SELECT memberID FROM members WHERE email = $1'
+    let getUserID = 'SELECT memberID FROM members WHERE email = '$1''
 
     db.one(getUserID, [sender]).then(row => {
-        memberID = row.memberID;
+        memberID = row.memberid;
         db.many(select, [memberID]).then(rows => {
             if (rows === null) {
                 res.send({success: false,
@@ -459,13 +459,13 @@ router.post('/convoReqReceived', (req, res) => {
 })
 
 router.post('/connReceived', (req, res) => {
-    let sender = req.body['email'];
+    let email = req.body['email'];
     let select = `SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified FROM Members
     JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_b = $1) as C
     ON memberid_a = memberid`;
     let getUserID = 'SELECT memberID FROM members WHERE email = $1'
 
-    db.one(getUserID, [sender]).then(row => {
+    db.one(getUserID, [email]).then(row => {
         memberID = row.memberID;
         db.many(select, [memberID]).then(rows => {
             if (rows === null) {
