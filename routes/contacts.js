@@ -396,6 +396,8 @@ router.post('/convoReqSent', (req, res) => {
 
     db.one(getUserID, [sender]).then(row => {
         memberID = row['memberID'];
+
+        console.log("Running selectChats on memberID" + memberID)
         db.many(selectChat, [memberID]).then(rows => {
 
             if (rows === null) {
