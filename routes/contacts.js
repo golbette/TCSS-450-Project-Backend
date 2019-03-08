@@ -395,7 +395,7 @@ router.post('/convoReqSent', (req, res) => {
     let getUserID = 'SELECT memberID FROM members WHERE email = $1';
 
     db.one(getUserID, [sender]).then(row => {
-        memberID = row['userID'];
+        memberID = row['memberID'];
         db.many(selectChat, [memberID]).then(rows => {
 
             if (rows === null) {
@@ -432,7 +432,7 @@ router.post('/convoReqReceived', (req, res) => {
     let getUserID = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserID, [sender]).then(row => {
-        memberID = row['userID'];
+        memberID = row['memberID'];
         db.many(select, [memberID]).then(rows => {
             if (rows === null) {
                 res.send({success: false,
@@ -463,7 +463,7 @@ router.post('/connReceived', (req, res) => {
     let getUserID = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserID, [sender]).then(row => {
-        memberID = row['userID'];
+        memberID = row['memberID'];
         db.many(select, [memberID]).then(rows => {
             if (rows === null) {
                 res.send({success: false,
