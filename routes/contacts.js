@@ -162,7 +162,6 @@ router.post('/connReq',  (req, res) => {
             let receiver = row.memberid;
             let insert = 'INSERT INTO Contacts(MemberID_A, MemberID_B, verified) VALUES ($1, $2, 0)';
             let select = 'SELECT * FROM Contacts WHERE MemberID_A = $1 AND MemberID_B = $2';
-            let success = true;
 
             db.none(select, [sender, receiver]).then(() =>{
                 db.none(insert, [sender, receiver]).then (() => {
@@ -200,6 +199,57 @@ router.post('/connReq',  (req, res) => {
         })
     })
 })
+
+router.post('/convoReq',  (req, res) => {
+    let email = req.body['email_a'];
+    let receiver = req.body['email_b'];
+    db.one('select memberid from members where email = $1', [email]).then(row=>{
+        let sender = row.memberid;
+
+        db.one('select memberid from members where email = $1', [receiver]).then(row=>{
+            let receiver = row.memberid;
+            let insertChat = 'INSERT INTO Chats(approved) VALUES (0) RETURNING chatid)';
+            let insertMembers = 'INSERT INTO chatmembers(chatid, memberid) VALUES ($1, $2);';
+            let select = 'SELECT * FROM Chats WHERE MemberID_A = $1 AND MemberID_B = $2';
+                db.one(insertChat).then (row => {
+                    id = row.chatid
+                    db.one(insertMembers, [id, sender]).then(() => {
+                        db.one(insertMembers, [id, receiver]).then(() => {
+                            res.send({
+                                success:true
+                            })
+                        }).catch(err => {
+                            res.send({
+                                success:false,
+                                error:err.message,
+                                errorTime: 'insert receiver'
+                            })
+                        })
+                    }).catch(err => {
+                        res.send({
+                            success:false,
+                            error:err.message,
+                            errorTime: 'creating addition'
+                        })
+                })
+                }).catch(err => {
+                    res.send({
+                        success:false,
+                        error:err.message,
+                        errorTime: 'inserting chat'
+                    })
+        })
+    }).catch(err => {
+        res.send({
+            success:false,
+            error:err.message,
+            errorTime: 'get sender',
+            message:'Member does not exist or member id is missing.',
+        })
+    })
+})
+})
+
 
 
 router.post('/connApprove', (req, res) => {
@@ -250,9 +300,61 @@ router.post('/connApprove', (req, res) => {
         
 })
 
+router.post('/convoApprove', (req, res) => {
+    let sender = req.body['email_a'];
+    let receiver = req.body['email_b'];
+
+    let select = `select chatid from chatmembers WHERE 
+    memberid = $2 and chatid in(select chatid from chatmembers where memberid = $1)`;
+    let getUserName = 'SELECT memberID FROM members WHERE email = $1'
+
+    db.one(getUserName, [sender]).then( rows =>{
+        sender = rows['memberid']
+        db.one(getUserName, [receiver]).then ( rows => {
+            receiver = rows['memberid']
+
+            db.many(select, [receiver, sender]).then(rows =>{
+                let update = 'UPDATE CHATS SET approved = 1 WHERE chatID = $1 ';
+    
+                db.none(update, [rows.chatid]).then( () => {
+    
+                    res.send({
+                        success:true,
+                    })
+    
+                }).catch(err => {
+                    res.send({
+                        success:false,
+                        error:err.message
+                    })
+                })
+            }).catch(err => {
+                res.send({
+                    success:false,
+                    error:err.message
+                })
+            })
+        }).catch(err => {
+            res.send({
+                success:false,
+                error:err.message
+            })
+        })
+    }).catch(err => {
+        res.send({
+            success:false,
+            error:err.message
+        })
+    })
+        
+})
+
+
 router.post('/connSent', (req, res) => {
     let sender = req.body['email'];
-    let select = 'SELECT verified FROM CONTACTS WHERE (MemberID_A = $1) AND verified = 0';
+    let select = `SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified FROM Members
+    JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_a = $1) as C
+    ON memberid_b = memberid`
     let getUserID = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserID, [sender]).then(row => {
@@ -261,6 +363,80 @@ router.post('/connSent', (req, res) => {
             if (rows === null) {
                 res.send({success: false,
                     message: "No pending contacts!"});
+            }
+            else {
+
+                
+                res.send({success: true,
+                    result: rows});
+            }
+        }).catch(err => {
+            res.send({success: false,
+                error: err.message,
+                time:"Retrieving contacts"});
+        })
+    }).catch(err => {
+        res.send({success: false,
+            error: err.message,
+            time:"Getting UserID"});
+    })
+
+})
+
+router.post('/convoReqSent', (req, res) => {
+    let sender = req.body['email'];
+    let selectChat = `SELECT A.chatid, A.name, A.approved, U.firstname, U.lastname, U.username FROM chats as A
+    JOIN (SELECT chatid, memberid FROM chatmembers WHERE memberid = $1) as C
+    ON A.chatid = C.chatid
+    JOIN (SELECT chatid, memberid FROM chatmembers) as M
+    ON M.chatid = C.chatid
+    JOIN (SELECT memberid, firstname, lastname, username, email FROM members) as U
+    ON U.memberid = M.memberid`;
+    let getUserID = 'SELECT memberID FROM members WHERE email = $1';
+
+    db.one(getUserID, [sender]).then(row => {
+        memberID = row['userID'];
+        db.many(selectChat, [memberID]).then(rows => {
+
+            if (rows === null) {
+                res.send({success: false,
+                    message: "No pending convos!"});
+            }
+            else {
+
+                res.send({success: true,
+                    result: rows});
+            }
+        }).catch(err => {
+            res.send({success: false,
+                error: err.message,
+                time:"Retrieving chats"});
+        })
+    }).catch(err => {
+        res.send({success: false,
+            error: err.message,
+            time:"Getting UserID"});
+    })
+
+})
+
+router.post('/convoReqReceived', (req, res) => {
+    let sender = req.body['email'];
+    let select = `SELECT A.chatid, A.name, A.approved, U.firstname, U.lastname, U.username FROM chats as A
+    JOIN (SELECT chatid, memberid FROM chatmembers WHERE memberid = $1) as C
+    ON A.chatid = C.chatid
+    JOIN (SELECT chatid, memberid FROM chatmembers) as M
+    ON M.chatid = C.chatid
+    JOIN (SELECT memberid, firstname, lastname, username, email FROM members) as U
+    ON U.memberid = M.memberid`;
+    let getUserID = 'SELECT memberID FROM members WHERE email = $1'
+
+    db.one(getUserID, [sender]).then(row => {
+        memberID = row['userID'];
+        db.many(select, [memberID]).then(rows => {
+            if (rows === null) {
+                res.send({success: false,
+                    message: "No pending convos!"});
             }
             else {
                 res.send({success: true,
@@ -281,7 +457,9 @@ router.post('/connSent', (req, res) => {
 
 router.post('/connReceived', (req, res) => {
     let sender = req.body['email'];
-    let select = 'SELECT verified FROM CONTACTS WHERE (MemberID_B = $1) AND verified = 0';
+    let select = `SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified FROM Members
+    JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_b = $1) as C
+    ON memberid_a = memberid`;
     let getUserID = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserID, [sender]).then(row => {

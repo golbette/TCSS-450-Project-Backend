@@ -28,7 +28,8 @@ CREATE TABLE Contacts(PrimaryKey SERIAL PRIMARY KEY,
 
 DROP TABLE IF EXISTS Chats;
 CREATE TABLE Chats (ChatID SERIAL PRIMARY KEY,
-                    Name VARCHAR(255)
+                    Name VARCHAR(255),
+                    Approved INT DEFAULT 0
 );
 
 DROP TABLE IF EXISTS ChatMembers;
