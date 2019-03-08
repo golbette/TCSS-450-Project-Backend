@@ -208,7 +208,7 @@ router.post('/convoReq',  (req, res) => {
 
         db.one('select memberid from members where email = $1', [receiver]).then(row=>{
             let receiver = row.memberid;
-            let insertChat = 'INSERT INTO Chats(approved) VALUES (0) RETURNING chatid)';
+            let insertChat = 'INSERT INTO Chats(approved) VALUES (1) RETURNING chatid)';
             let insertMembers = 'INSERT INTO chatmembers(chatid, memberid) VALUES ($1, $2);';
             let select = 'SELECT * FROM Chats WHERE MemberID_A = $1 AND MemberID_B = $2';
                 db.one(insertChat).then (row => {
@@ -350,7 +350,7 @@ router.post('/convoApprove', (req, res) => {
 })
 
 
-router.post('/connSent', (req, res) => {
+router.post('/getConvos', (req, res) => {
     let sender = req.body['email'];
     let select = `SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified FROM Members
     JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_a = $1) as C
