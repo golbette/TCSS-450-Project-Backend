@@ -394,6 +394,7 @@ router.post('/convoReqSent', (req, res) => {
     ON U.memberid = M.memberid`;
     let getUserID = 'SELECT memberID FROM members WHERE email = $1';
 
+    console.log("Running getUserID on " + sender);
     db.one(getUserID, [sender]).then(row => {
         memberID = row.memberID;
 
