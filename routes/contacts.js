@@ -241,7 +241,36 @@ router.post('/connApprove', (req, res) => {
 
 router.post('/connSent', (req, res) => {
     let sender = req.body['email'];
-    let select = 'SELECT verified FROM CONTACTS WHERE (MemberID_B = $1 OR MemberID_A = $1) AND verified = 0';
+    let select = 'SELECT verified FROM CONTACTS WHERE (MemberID_A = $1) AND verified = 0';
+    let getUserID = 'SELECT memberID FROM members WHERE email = $1'
+
+    db.one(getUserID, [sender]).then(row => {
+        memberID = row['userID'];
+        db.many(select, [memberID]).then(rows => {
+            if (rows === null) {
+                res.send({success: false,
+                    message: "No pending contacts!"});
+            }
+            else {
+                res.send({success: true,
+                    result: rows});
+            }
+        }).catch(err => {
+            res.send({success: false,
+                error: err.message,
+                time:"Retrieving contacts"});
+        })
+    }).catch(err => {
+        res.send({success: false,
+            error: err.message,
+            time:"Getting UserID"});
+    })
+
+})
+
+router.post('/connReceived', (req, res) => {
+    let sender = req.body['email'];
+    let select = 'SELECT verified FROM CONTACTS WHERE (MemberID_B = $1) AND verified = 0';
     let getUserID = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserID, [sender]).then(row => {
