@@ -208,13 +208,13 @@ router.post('/convoReq',  (req, res) => {
 
         db.one('select memberid from members where email = $1', [receiver]).then(row=>{
             let receiver = row.memberid;
-            let insertChat = 'INSERT INTO Chats(approved) VALUES (1) RETURNING chatid';
+            let insertChat = 'INSERT INTO Chats(approved) VALUES (1) RETURNING chatidhero';
             let insertMembers = 'INSERT INTO chatmembers(chatid, memberid) VALUES ($1, $2);';
             let select = 'SELECT * FROM Chats WHERE MemberID_A = $1 AND MemberID_B = $2';
                 db.one(insertChat).then (row => {
                     id = row.chatid
-                    db.one(insertMembers, [id, sender]).then(() => {
-                        db.one(insertMembers, [id, receiver]).then(() => {
+                    db.none(insertMembers, [id, sender]).then(() => {
+                        db.none(insertMembers, [id, receiver]).then(() => {
                             res.send({
                                 success:true
                             })
