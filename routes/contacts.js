@@ -383,7 +383,7 @@ router.post('/connSent', (req, res) => {
 
 })
 
-router.post('/convoReqSent', (req, res) => {
+router.post('/getConvos', (req, res) => {
     let sender = req.body['email'];
     let selectChat = `SELECT A.chatid, A.name, A.approved, U.firstname, U.lastname, U.username FROM chats as A
     JOIN (SELECT chatid, memberid FROM chatmembers WHERE memberid = $1) as C
