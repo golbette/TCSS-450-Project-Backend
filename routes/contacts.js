@@ -260,9 +260,9 @@ router.post('/connApprove', (req, res) => {
     let getUserName = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserName, [sender]).then( rows =>{
-        sender = rows.memberID;
+        sender = rows.memberid;
         db.one(getUserName, [receiver]).then ( rows => {
-            receiver = rows.memberID;
+            receiver = rows.memberid;
 
             db.one(select, [receiver, sender]).then(rows =>{
                 let update = 'UPDATE CONTACTS SET verified = 1 WHERE MemberID_B = $1 AND MemberID_A = $2 ';
@@ -309,9 +309,9 @@ router.post('/convoApprove', (req, res) => {
     let getUserName = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserName, [sender]).then( rows =>{
-        sender = rows.memberID;
+        sender = rows.memberid;
         db.one(getUserName, [receiver]).then ( rows => {
-            receiver = rows.memberID;
+            receiver = rows.memberid;
 
             db.many(select, [receiver, sender]).then(rows =>{
                 let update = 'UPDATE CHATS SET approved = 1 WHERE chatID = $1 ';
@@ -358,7 +358,7 @@ router.post('/connSent', (req, res) => {
     let getUserID = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserID, [sender]).then(row => {
-        memberID = row.memberID;
+        memberID = row.memberid;
         db.many(select, [memberID]).then(rows => {
             if (rows === null) {
                 res.send({success: false,
@@ -396,7 +396,7 @@ router.post('/convoReqSent', (req, res) => {
 
     console.log("Running getUserID on " + sender);
     db.one(getUserID, [sender]).then(row => {
-        memberID = row.memberID;
+        memberID = row.memberid;
 
         console.log("Running selectChats on memberID" + memberID);
         db.many(selectChat, [memberID]).then(rows => {
@@ -432,7 +432,7 @@ router.post('/convoReqReceived', (req, res) => {
     ON M.chatid = C.chatid
     JOIN (SELECT memberid, firstname, lastname, username, email FROM members) as U
     ON U.memberid = M.memberid`;
-    let getUserID = 'SELECT memberID FROM members WHERE email = '$1''
+    let getUserID = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserID, [sender]).then(row => {
         memberID = row.memberid;
@@ -466,7 +466,7 @@ router.post('/connReceived', (req, res) => {
     let getUserID = 'SELECT memberID FROM members WHERE email = $1'
 
     db.one(getUserID, [email]).then(row => {
-        memberID = row.memberID;
+        memberID = row.memberid;
         db.many(select, [memberID]).then(rows => {
             if (rows === null) {
                 res.send({success: false,
