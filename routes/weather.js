@@ -309,7 +309,8 @@ router.delete('/location', (req, res) => {
         .then(() => {
             return res.send({
                 success: true,
-                msg: "Removed your location"
+                msg: "Removed your location",
+                nickname: nickname
            });
         }).catch((err) => {
             console.log(err);
