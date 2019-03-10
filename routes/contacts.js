@@ -188,7 +188,7 @@ router.post('/connReq',  (req, res) => {
             let insert = 'INSERT INTO Contacts(MemberID_A, MemberID_B, verified) VALUES ($1, $2, 0)';
             let select = 'SELECT * FROM Contacts WHERE MemberID_A = $1 AND MemberID_B = $2';
 
-            db.manyornone(select, [sender, receiverId]).then(() =>{
+            db.one(select, [sender, receiverId]).then(() =>{
                 db.none(insert, [sender, receiverId]).then (() => {
                     db.one(select, [sender, receiverId]).then(() => {
                         // Send a notification of this request to involved members with registered tokens
