@@ -556,16 +556,19 @@ router.post('/convoAdd', (req, res) => {
         }).catch(err => {
             res.send({
                 "success":"false",
-                "error": "err",
+                "error": err.msg,
                 "time": "insert members into chat"
             })
         })
 
-    }).catch(err=>(res.send({
-        "success":"false",
-        "error": "err",
-        "time": "get member ID"
+    }).catch(err=> {
+        res.send({
+            "success":"false",
+            "error": err.msg,
+            "time": "retrieve userid"
+        })
     })
 })
+
 
 module.exports = router;
