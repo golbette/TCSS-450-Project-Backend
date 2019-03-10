@@ -207,7 +207,7 @@ router.post('/connReq',  (req, res) => {
             let insert = 'INSERT INTO Contacts(MemberID_A, MemberID_B, verified) VALUES ($1, $2, 0)';
             let select = 'SELECT * FROM Contacts WHERE MemberID_A = $1 AND MemberID_B = $2';
 
-            db.none(select, [sender, receiverId]).then(() =>{
+            db.manyornone(select, [sender, receiverId]).then(() =>{
                 db.none(insert, [sender, receiverId]).then (() => {
                     db.one(select, [sender, receiverId]).then(() => {
                         // Send a notification of this request to involved members with registered tokens
@@ -556,6 +556,35 @@ router.post('/connReceived', (req, res) => {
             time:"Getting UserID"});
     })
 
+})
+
+router.post('/convoAdd', (req, res) => {
+    let email = req.body['email'];
+    let chatID = req.body['chatID'];
+
+    let getUserID = 'SELECT memberID FROM members WHERE email = $1';
+    let insert = 'INSERT INTO chatmembers(chatid, memberid) VALUES ($1, $2)';
+
+    db.one(getUserID, email).then(row => {
+        memberID = row.memberid;
+
+        db.none(insert, [chatID, memberID]).then(row => {
+            res.send({
+                "success":"true"
+            })
+        }).catch(err => {
+            res.send({
+                "success":"false",
+                "error": "err",
+                "time": "insert members into chat"
+            })
+        })
+
+    }).catch(err=>(res.send({
+        "success":"false",
+        "error": "err",
+        "time": "get member ID"
+    })
 })
 
 module.exports = router;
