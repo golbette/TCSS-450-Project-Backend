@@ -28,18 +28,20 @@ router.post('/send', (req, res) => {
                 db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1)', [chatId]).then(rows => {
                     rows.forEach(element => {
                         msg_functions.sendToIndividual(element['token'], message, username, chatId);
-                        db.one('select email from members where memberid = $1', [element.memberid]).then(receiverEmail => {
-                            db.none(`insert into notifications (chatid, email_a, email_b, notetype) values ($1, $2, $3, 'msg')`, [chatId, member.email, receiverEmail.email]).then(()=>{
-                                res.send({
-                                    success:true,
-                                    message:"notifications sent"
+                        db.one('select username, email from members where memberid = $1', [element.memberid]).then(receivers => {
+                            if (receivers.username != username) {// TODO ******* check if id equals the user's id. if so don't come in.
+                                db.none(`insert into notifications (chatid, email_a, email_b, notetype) values ($1, $2, $3, 'msg')`, [chatId, member.email, receivers.email]).then(()=>{
+                                    res.send({
+                                        success:true,
+                                        message:"notifications sent"
+                                    })
+                                }).catch(err=>{
+                                    res.send({
+                                        "success":false,
+                                        "message":"failed to insert msg notification " + err.message
+                                    })
                                 })
-                            }).catch(err=>{
-                                res.send({
-                                    "success":false,
-                                    "message":"failed to insert msg notification " + err.message
-                                })
-                            })
+                            }
                         }).catch(err=>{
                             res.send({
                                 "success":false, 
