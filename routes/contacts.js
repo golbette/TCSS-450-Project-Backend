@@ -36,11 +36,11 @@ router.post('/searchcontacts', (req, res) => {
 })
 
 /**
- * Returns the username of the member given their email.
+ * Returns the all the member info of the member given their email.
  */
-router.post('/getusername', (req, res) => {
+router.post('/getmemberinfo', (req, res) => {
     let email = req.body['email'];
-    db.one('select username from members where email=$1', [email]).then(row=>{
+    db.one('select memberid, firstname, lastname, username from members where email=$1', [email]).then(row=>{
         res.send({
             success:true,
             message:row
