@@ -72,3 +72,14 @@ CREATE TABLE Push_Token (KeyID SERIAL PRIMARY KEY,
                         Token VARCHAR(255),
                         FOREIGN KEY(MemberID) REFERENCES Members(MemberID)
 );
+
+DROP TABLE IF EXISTS Notifications;
+CREATE TABLE Notifications (NotificationID SERIAL PRIMARY KEY, 
+                            ChatID INT,
+                            Email_a VARCHAR(255), 
+                            Email_b VARCHAR(255) NOT NULL, 
+                            NoteType VARCHAR(255) NOT NULL, 
+                            FOREIGN KEY(ChatID) REFERENCES Chats(ChatID),
+                            FOREIGN KEY(Email_a) REFERENCES Members(Email),
+                            FOREIGN KEY(Email_b) REFERENCES Members(Email)
+);

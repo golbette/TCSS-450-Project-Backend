@@ -5,6 +5,9 @@ const bodyParser = require("body-parser");
 router.use(bodyParser.json());
 let msg_functions = require('../utilities/utils.js').messaging;
 
+/** REQUEST_ID is reserved for connection and conversation requests. */
+const REQUEST_ID = 21;
+
 /**
  * Searche within the members database for tuples that matches the input. 
  * Username, First Name, Last Name, and Email are accepted as input.
@@ -58,7 +61,7 @@ router.post('/getcontacts', (req, res) => {
     db.one('select memberid from members where email=$1', [email]).then(row => {
 
 
-        db.any('select members.firstname, members.lastname, members.email, members.username from members where members.memberid = any (select memberid_b from contacts where memberid_a=$1 and verified = 1)', [row.memberid]).then(rows => {
+        db.any('select members.firstname, members.lastname, members.email, members.username from members where members.memberid = any (select memberid_b from contacts where memberid_a=6 and verified = 1) or members.memberid = any (select memberid_a from contacts where memberid_b=6 and verified = 1)', [row.memberid]).then(rows => {
             res.send({
                 success:true,
                 message:rows
@@ -157,17 +160,41 @@ router.post('/connReq',  (req, res) => {
     let receiver = req.body['email_b'];
     db.one('select memberid from members where email = $1', [email]).then(row=>{
         let sender = row.memberid;
-
         db.one('select memberid from members where email = $1', [receiver]).then(row=>{
-            let receiver = row.memberid;
+            let receiverId = row.memberid;
             let insert = 'INSERT INTO Contacts(MemberID_A, MemberID_B, verified) VALUES ($1, $2, 0)';
             let select = 'SELECT * FROM Contacts WHERE MemberID_A = $1 AND MemberID_B = $2';
 
-            db.none(select, [sender, receiver]).then(() =>{
-                db.none(insert, [sender, receiver]).then (() => {
-                    db.one(select, [sender, receiver]).then(() => {
-                        res.send({
-                            success:true
+            db.none(select, [sender, receiverId]).then(() =>{
+                db.none(insert, [sender, receiverId]).then (() => {
+                    db.one(select, [sender, receiverId]).then(() => {
+                        // Send a notification of this request to involved members with registered tokens
+                        db.one('SELECT * FROM Push_Token where memberid = $1', [receiverId]).then(row => {
+                            console.log('receiverId: ' + receiverId + ' push token: ' + row.token);
+                            db.one('select username from members where memberid = $1', [sender]).then(row=>{
+                                // msg_functions.sendToIndividual(row.token, '', row.username, REQUEST_ID); // This line is currently bugged. Will fix it later.
+                                db.none(`insert into notifications (email_a, email_b, notetype) values($1, $2, 'connreq')`, [email, receiver]).then(()=>{
+                                    res.send({
+                                        success:true,
+                                        message:"notification sent"
+                                    })
+                                }).catch(err=>{
+                                    res.send({
+                                        success:false,
+                                        message:"failed to insert notifications" + err.message
+                                    })
+                                })
+                            }).catch(err=>{
+                                res.send({
+                                    success:false,
+                                    message:"can't find sender username with sender id" + err.message
+                                })
+                            })
+                        }).catch(err => {
+                            res.send({
+                                success:false,
+                                error:err + ' (no token was returned)'
+                            })
                         })
                     }).catch(err => {
                         res.send({
@@ -205,49 +232,48 @@ router.post('/convoReq',  (req, res) => {
     let receiver = req.body['email_b'];
     db.one('select memberid from members where email = $1', [email]).then(row=>{
         let sender = row.memberid;
-
         db.one('select memberid from members where email = $1', [receiver]).then(row=>{
             let receiver = row.memberid;
             let insertChat = 'INSERT INTO Chats(approved) VALUES (0) RETURNING chatid)';
             let insertMembers = 'INSERT INTO chatmembers(chatid, memberid) VALUES ($1, $2);';
             let select = 'SELECT * FROM Chats WHERE MemberID_A = $1 AND MemberID_B = $2';
-                db.one(insertChat).then (row => {
-                    id = row.chatid
-                    db.one(insertMembers, [id, sender]).then(() => {
-                        db.one(insertMembers, [id, receiver]).then(() => {
-                            res.send({
-                                success:true
-                            })
-                        }).catch(err => {
-                            res.send({
-                                success:false,
-                                error:err.message,
-                                errorTime: 'insert receiver'
-                            })
+            db.one(insertChat).then (row => {
+                id = row.chatid
+                db.one(insertMembers, [id, sender]).then(() => {
+                    db.one(insertMembers, [id, receiver]).then(() => {
+                        res.send({
+                            success:true
                         })
                     }).catch(err => {
                         res.send({
                             success:false,
                             error:err.message,
-                            errorTime: 'creating addition'
+                            errorTime: 'insert receiver'
                         })
-                })
+                    })
                 }).catch(err => {
                     res.send({
                         success:false,
                         error:err.message,
-                        errorTime: 'inserting chat'
+                        errorTime: 'creating addition'
                     })
-        })
-    }).catch(err => {
-        res.send({
-            success:false,
-            error:err.message,
-            errorTime: 'get sender',
-            message:'Member does not exist or member id is missing.',
+                })
+            }).catch(err => {
+                res.send({
+                    success:false,
+                    error:err.message,
+                    errorTime: 'inserting chat'
+                })
+            })
+        }).catch(err => {
+            res.send({
+                success:false,
+                error:err.message,
+                errorTime: 'get sender',
+                message:'Member does not exist or member id is missing.',
+            })
         })
     })
-})
 })
 
 

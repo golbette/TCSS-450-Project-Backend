@@ -15,6 +15,7 @@ app.use('/contacts', require('./routes/contacts.js'));
 app.use('/verify', require('./routes/verify.js'));
 app.use('/pushy', require('./routes/pushy.js'));
 app.use('/messaging', require('./routes/messaging.js'));
+app.use('/notifications', require('./routes/notifications'));
 
 /** Use middle ware after merged with master for testing */
 // app.use('/weather',middleware.checkToken ,require('./routes/weather.js'));

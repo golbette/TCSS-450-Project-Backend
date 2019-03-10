@@ -7,9 +7,9 @@ let msg_functions = require('../utilities/utils.js').messaging;
 
 // Send a message to all users "in" the chat session with chatId
 router.post('/send', (req, res) => {
-    let username = req.body['username'];
-    let message = req.body['message'];
-    let chatId = req.body['chatid'];
+    let username = req.body['username']; // Sender's username
+    let message = req.body['message']; // Sender's message
+    let chatId = req.body['chatid']; // Id of the chat room where the message is sent
     if (!username || !message || !chatId) {
         res.send({
             success:false,
@@ -24,8 +24,8 @@ router.post('/send', (req, res) => {
 
             let insert = 'INSERT INTO messages (ChatId, Message, memberid) VALUES ($1, $2, $3)';
             db.none(insert, [chatId, message, member.memberid]).then(() => {
-            // Send a notification of this message to involved members with registered tokens
-                db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1)', [chatId]).then(rows => {
+                // Send a notification of this message to involved members with registered tokens
+                db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1) except select * from Push_Token where memberid=$2', [chatId, member.memberid]).then(rows => {
                     rows.forEach(element => {
                         msg_functions.sendToIndividual(element['token'], message, username, chatId);
                     })
