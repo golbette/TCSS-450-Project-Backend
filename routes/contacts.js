@@ -162,13 +162,8 @@ router.get('/getconnreq', (req, res) => {
  * If DENY reverse order. 
  */
 router.get('/cancel', (req, res) => {
-    let email_a = req.query['email_a'];
-    let email_b = req.query['email_b'];
-    db.one('select memberid from members where email = $1', [email_a]).then(row => {
-        let memberid_a = row['memberid'];
-        db.one('select memberid from members where email = $1', [email_b]).then(row => {
-            let memberid_b = row['memberid'];
-            
+    let memberid_a = req.query['memberid_a'];
+    let memberid_b = req.query['memberid_b'];         
             db.one('DELETE FROM CONTACTS WHERE (memberid_a = $1) AND (memberid_b = $2) RETURNING *',[ memberid_a, memberid_b])
             .then(() => {
                 res.send({
@@ -178,23 +173,9 @@ router.get('/cancel', (req, res) => {
             }).catch( err => {
                 res.send({
                     success: false, 
-                    msg: "Failed to delete request "
-    
+                    msg: "Failed to delete request "  
                 })
             })
-        }).catch( err => {
-            res.send({
-                succes: false, 
-                msg: "Member b not found"
-    
-            })      
-        });
-    }).catch( err => {
-        res.send({
-            success: false, 
-            msg: "Member a not found"
-        })
-    })
     });
 
 router.post('/connReq',  (req, res) => {
