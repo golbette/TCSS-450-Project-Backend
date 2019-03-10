@@ -13,6 +13,9 @@ router.post('/send', (req, res) => {
     if (!username || !message || !chatId) {
         res.send({
             success:false,
+            username:username,
+            message:message,
+            chatid:chatId,
             error:'Username, message, or ChatID not supplied.'
         })
         return;
