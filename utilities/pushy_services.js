@@ -25,7 +25,7 @@ function sendToTopic(topic, msg, from, chatId) {
 }
 
 // Use to send message to a specific client by the token
-function sendToIndividual(token, msg, from, chatId) {
+function sendToIndividual(token, msg, sender, receiver, chatId) {
     var type;
     if (chatId === REQUEST_ID) {
         type = "req";
@@ -34,7 +34,8 @@ function sendToIndividual(token, msg, from, chatId) {
     }
     var data = {
         "type":type,
-        "sender":from,
+        "sender":sender,
+        "receiver":receiver,
         "message":msg, 
         "chatid":chatId
     }

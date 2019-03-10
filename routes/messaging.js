@@ -30,8 +30,8 @@ router.post('/send', (req, res) => {
                 // db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1) except select * from Push_Token where memberid=$2', [chatId, member.memberid]).then(rows => { // Bugged. Commented out until problem is resolved.
                 db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1)', [chatId]).then(rows => {
                     rows.forEach(element => {
-                        msg_functions.sendToIndividual(element['token'], message, username, chatId);
                         db.one('select username, email from members where memberid = $1', [element.memberid]).then(receivers => {
+                            msg_functions.sendToIndividual(element['token'], message, username, receivers.username, chatId,);
                             if (receivers.username != username) {// TODO ******* check if id equals the user's id. if so don't come in.
                                 db.none(`insert into notifications (chatid, email_a, email_b, notetype) values ($1, $2, $3, 'msg')`, [chatId, member.email, receivers.email]).then(()=>{
                                     res.send({
