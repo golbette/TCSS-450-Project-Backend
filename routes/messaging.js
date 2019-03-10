@@ -24,7 +24,8 @@ router.post('/send', (req, res) => {
             let insert = 'INSERT INTO messages (ChatId, Message, memberid) VALUES ($1, $2, $3)';
             db.none(insert, [chatId, message, member.memberid]).then(() => {
                 // Send a notification of this message to involved members with registered tokens
-                db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1) except select * from Push_Token where memberid=$2', [chatId, member.memberid]).then(rows => {
+                // db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1) except select * from Push_Token where memberid=$2', [chatId, member.memberid]).then(rows => { // Bugged. Commented out until problem is resolved.
+                db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1)', [chatId]).then(rows => {
                     rows.forEach(element => {
                         msg_functions.sendToIndividual(element['token'], message, username, chatId);
                         db.one('select email from members where memberid = $1', [element.memberid]).then(receiverEmail => {
