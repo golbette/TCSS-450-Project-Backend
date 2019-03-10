@@ -17,26 +17,39 @@ router.post('/send', (req, res) => {
         })
         return;
     }
-    db.one('select memberid from members where username=$1', [username]).then(member=>{
+    db.one('select email, memberid from members where username=$1', [username]).then(member=>{
         //check if the chat exists
         let select = 'SELECT ChatId from Chats where ChatId = $1';
         db.one(select, [chatId]).then(row => {
-
             let insert = 'INSERT INTO messages (ChatId, Message, memberid) VALUES ($1, $2, $3)';
             db.none(insert, [chatId, message, member.memberid]).then(() => {
                 // Send a notification of this message to involved members with registered tokens
                 db.any('SELECT * FROM Push_Token where memberid = any (select memberid from chatmembers where chatid=$1) except select * from Push_Token where memberid=$2', [chatId, member.memberid]).then(rows => {
                     rows.forEach(element => {
                         msg_functions.sendToIndividual(element['token'], message, username, chatId);
-                    })
-                    res.send({
-                        success:true,
-                        message:"notifications sent"
+                        db.one('select email from members where memberid = $1', [element.memberid]).then(receiverEmail => {
+                            db.none(`insert into notifications (chatid, email_a, email_b, notetype) values ($1, $2, $3, 'msg')`, [chatId, member.email, receiverEmail.email]).then(()=>{
+                                res.send({
+                                    success:true,
+                                    message:"notifications sent"
+                                })
+                            }).catch(err=>{
+                                res.send({
+                                    "success":false,
+                                    "message":"failed to insert msg notification " + err.message
+                                })
+                            })
+                        }).catch(err=>{
+                            res.send({
+                                "success":false, 
+                                "message":"failed to get receiver memberid by email " + err.message
+                            })
+                        })
                     })
                 }).catch(err => {
                     res.send({
                         success:false,
-                        error:err
+                        error:err.message
                     })
                 })
             }).catch(err => {
