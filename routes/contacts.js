@@ -320,8 +320,8 @@ router.get('/connApprove', (req, res) => {
                 db.none(update, [receiver, sender]).then(()=>{
                     db.none('insert into chats (approved) values (1)').then(()=>{
                         // Have potential transaction issues if two user accepted a friend's request at almost the sametime.
-                        db.any('insert into chatmembers values ((select max(chatid) from chats), $1', [sender]).then(()=>{
-                            db.any('insert into chatmembers values ((select max(chatid) from chats), $1', [receiver]).then(()=>{
+                        db.none('insert into chatmembers values ((select max(chatid) from chats), $1)', [sender]).then(()=>{
+                            db.none('insert into chatmembers values ((select max(chatid) from chats), $1)', [receiver]).then(()=>{
                                 console.log("chatmembers added to new chatroom");
                                 res.send({
                                     success:true,
