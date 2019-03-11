@@ -464,7 +464,7 @@ router.post('/getConvos', (req, res) => {
     ON M.chatid = C.chatid
     JOIN (SELECT memberid, firstname, lastname, username, email FROM members) as U
     ON U.memberid = M.memberid`;
-    let getchatIDs = `SELECT chatid FROM chats where memberid = $1`
+    let getchatIDs = `SELECT chatid FROM chatmembers where memberid = $1`
     let getUserID = 'SELECT memberID FROM members WHERE email = $1';
 
     console.log("Running getUserID on " + sender);
