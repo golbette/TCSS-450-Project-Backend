@@ -100,7 +100,7 @@ router.get('/getconnreq', (req, res) => {
     db.one(`select memberid from members where email = $1`, [email]).then(row => {
         console.log(email);
         console.log(row);
-        db.many(`SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
+        db.many(`SELECT email, memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
         FROM Members
         JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_b = $1 AND verified = 0) as C
         ON memberid_a = memberid`, 
@@ -115,7 +115,7 @@ router.get('/getconnreq', (req, res) => {
             console.log(err);
             res.send({
                 success:false, 
-                message:'You are all caught up!'
+                message:'You no current requests'
             })
         })
     }).catch(err=>{
@@ -143,7 +143,7 @@ router.get('/getconnreq', (req, res) => {
             console.log(err);
             res.send({
                 success:false, 
-                message:'You are all caught up!'
+                message:'You have no pending sent requests'
             })
         })
     }).catch(err=>{
@@ -167,7 +167,7 @@ router.get('/cancel', (req, res) => {
             db.one('DELETE FROM CONTACTS WHERE (memberid_a = $1) AND (memberid_b = $2) RETURNING *',[ memberid_a, memberid_b])
             .then(() => {
                 res.send({
-                    succes: true,
+                    success: true,
                     msg: "Removed contact request"
                 });
             }).catch( err => {
