@@ -303,9 +303,9 @@ router.post('/convoReq',  (req, res) => {
 
 
 
-router.post('/connApprove', (req, res) => {
-    let sender = req.body['email_a'];
-    let receiver = req.body['email_b'];
+router.get('/connApprove', (req, res) => {
+    let sender = req.query['email_a'];
+    let receiver = req.query['email_b'];
 
     let select = 'SELECT verified FROM CONTACTS WHERE MemberID_B = $1 AND MemberID_A = $2';
     let getUserName = 'SELECT memberID FROM members WHERE email = $1'
