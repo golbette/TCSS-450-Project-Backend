@@ -128,7 +128,7 @@ router.get('/getconnreq', (req, res) => {
     db.one(`select memberid from members where email = $1`, [email]).then(row => {
         console.log(email);
         console.log(row);
-        db.many(`SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
+        db.many(`SELECT email, memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
         FROM Members
         JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_a = $1 AND verified = 0) as C
         ON memberid_b = memberid`, 
