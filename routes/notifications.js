@@ -51,19 +51,28 @@ router.post('/clearnotification', (req, res) => {
     let type = req.body['notetype']; // type of requests
     let chatid = req.body['chatid']; // chatid (if it's a msg notification)
     let email_a = req.body['email_a']; // Sender's email
-    let email_b = req.body['email_b']; // Receiver's email
+    let email_b = req.body['email_b']; // Receiver's email (at this instance, the user is the receiver)
 
-    if (type === 'msg') {
+    if (chatid && type === 'msg') { // Clears the notifications of a specified chatroom by id. Currently NOT in use.
         db.none(`delete from notifications where notetype = 'msg' and email_b = $1 and chatid = $2`, [email_b, chatid]).then(()=>{
             res.send({
-                "success":true
+                "success":true,
+                "message":"notifications of chatid" + chatid + "deleted from database."
+            })
+        })
+    } else if (!chatid && type === 'msg') { // Clears all the notifications of type 'msg'.
+        db.none(`delete from notifications where notetype = 'msg' and email_b = $1`, [email_b]).then(()=>{
+            res.send({
+                "success":true,
+                "message":"notifications of all chat deleted from database."
             })
         })
     } else {
         db.none(`delete from notifications where notetype = 'connreq' and email_b = $1`, [email_b]).then(()=>{
             db.none(`delete from notifications where notetype = 'convoreq' and email_b = $1`, [email_b]).then(()=>{
                 res.send({
-                    "success":true
+                    "success":true,
+                    "message":"notifications of all requests deleted from database."
                 })
             })
         })
