@@ -323,7 +323,8 @@ router.get('/connApprove', (req, res) => {
                         db.none('insert into chatmembers values ((select max(chatid) from chats), $1', [sender]).then(()=>{
                             db.none('insert into chatmembers values ((select max(chatid) from chats), $1', [receiver]).then(()=>{
                                 res.send({
-                                    success:true
+                                    success:true,
+                                    message:"chatmembers added to new chatroom" 
                                 })
                             }).catch(err=>{
                                 res.send({
