@@ -80,8 +80,39 @@ router.post('/send', (req, res) => {
 })
 
 router.post('/getchats', (req, res) => {
-    let email = ['email'];
-    //select username from members where memberid = any (select memberid from messages where chatid = any (select chatid from chatmembers where memberid = 14))
+    let email = req.body['email'];
+    // Gets you the member id of the user based on the user's email.
+    db.one('select memberid from members where email = $1', [email]).then(memberid=>{
+        // Gets you a list of chat ids that the user participated in.
+        db.any('select chatid from chatmembers where memberid=$1 order by chatid asc', [memberid.memberid]).then(chatIds => {
+            // Returns other members' information based on chatids associated with the user.
+            db.any('select chatmembers.chatid, members.firstname, members.lastname, members.username, members.email, members.memberid from chatmembers, members where chatmembers.memberid !=$1 and chatmembers.memberid=members.memberid and chatmembers.chatid = any(select chatid from chatmembers where memberid=$1) order by chatid asc', [memberid.memberid]).then(membersInfoByChatId=>{
+                res.send({
+                    success:true, 
+                    chatids:chatIds, 
+                    memberinfos:membersInfoByChatId
+                })
+            }).catch(err=>{
+                res.send({
+                    success:false,
+                    error:err.message,
+                    message:"failed to return other members' information."
+                })
+            })
+        }).catch(err=>{
+            res.send({
+                success:false,
+                error:err.message,
+                message:"failed to return the list of chat ids that the user participated in."
+            })
+        })
+    }).catch(err=>{
+        res.send({
+            success:false,
+            error:err.message, 
+            message:"failed to find memberid based on the email provided."
+        })
+    })
 })
 
 //create a new chat. Requires an array of usermnaesmess and a chatid
