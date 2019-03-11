@@ -79,6 +79,11 @@ router.post('/send', (req, res) => {
     })
 })
 
+router.post('/getchats', (req, res) => {
+    let email = ['email'];
+    //select username from members where memberid = any (select memberid from messages where chatid = any (select chatid from chatmembers where memberid = 14))
+})
+
 //create a new chat. Requires an array of usermnaesmess and a chatid
 router.post('/create', (req, res) => {
     let users = req.body['userIds'];

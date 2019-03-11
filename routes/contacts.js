@@ -317,13 +317,32 @@ router.get('/connApprove', (req, res) => {
 
             db.one(select, [receiver, sender]).then(rows =>{
                 let update = 'UPDATE CONTACTS SET verified = 1 WHERE MemberID_B = $1 AND MemberID_A = $2 ';
-    
-                db.none(update, [receiver, sender]).then( () => {
-    
-                    res.send({
-                        success:true,
+                db.none(update, [receiver, sender]).then(()=>{
+                    db.none('insert into chats (approved) values (1)').then(()=>{
+                        // Have potential transaction issues if two user accepted a friend's request at almost the sametime.
+                        db.none('insert into chatmembers values (select max(chatid) from chats, $1', [sender]).then(()=>{
+                            db.none('insert into chatmembers values (select max(chatid) from chats, $1', [receiver]).then(()=>{
+                                res.send({
+                                    success:true
+                                })
+                            }).catch(err=>{
+                                res.send({
+                                    success:false,
+                                    error:err.message
+                                })
+                            })
+                        }).catch(err => {
+                            res.send({
+                                success:false,
+                                error:err.message
+                            })
+                        })
+                    }).catch(err => {
+                        res.send({
+                            success:false,
+                            error:err.message
+                        })
                     })
-    
                 }).catch(err => {
                     res.send({
                         success:false,
