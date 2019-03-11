@@ -483,6 +483,10 @@ router.post('/getConvos', (req, res) => {
                     res.send({success: true,
                         chatids: chatIDs,
                         memberInfos: rows});
+                }).catch(err => {
+                    res.send({success: false,
+                    error: err.message,
+                    time: "retrieve chatids"});
                 })
                 
             }
