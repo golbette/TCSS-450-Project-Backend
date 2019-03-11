@@ -322,6 +322,7 @@ router.get('/connApprove', (req, res) => {
                         // Have potential transaction issues if two user accepted a friend's request at almost the sametime.
                         db.none('insert into chatmembers values ((select max(chatid) from chats), $1', [sender]).then(()=>{
                             db.none('insert into chatmembers values ((select max(chatid) from chats), $1', [receiver]).then(()=>{
+                                console.log("chatmembers added to new chatroom");
                                 res.send({
                                     success:true,
                                     message:"chatmembers added to new chatroom" 
