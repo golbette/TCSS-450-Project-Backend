@@ -458,12 +458,13 @@ router.post('/connSent', (req, res) => {
 router.post('/getConvos', (req, res) => {
     let sender = req.body['email'];
     let selectChat = `SELECT A.chatid, A.name, A.approved, U.firstname, U.lastname, U.username FROM chats as A
-    JOIN (SELECT chatid, memberid FROM chatmembers WHERE memberid = $1) as C
+    JOIN (SELECT chatid, memberid FROM chatmembers WHERE memberid = 1) as C
     ON A.chatid = C.chatid
     JOIN (SELECT chatid, memberid FROM chatmembers) as M
     ON M.chatid = C.chatid
     JOIN (SELECT memberid, firstname, lastname, username, email FROM members) as U
     ON U.memberid = M.memberid`;
+    let getchatIDs = `SELECT chatid FROM chats where memberid = $1`
     let getUserID = 'SELECT memberID FROM members WHERE email = $1';
 
     console.log("Running getUserID on " + sender);
@@ -478,9 +479,12 @@ router.post('/getConvos', (req, res) => {
                     message: "No pending convos!"});
             }
             else {
-
-                res.send({success: true,
-                    result: rows});
+                db.many(getChatIDs, [memberID]).then(chatIDs => {
+                    res.send({success: true,
+                        chatids: chatIDs,
+                        memberInfos: rows});
+                })
+                
             }
         }).catch(err => {
             res.send({success: false,
