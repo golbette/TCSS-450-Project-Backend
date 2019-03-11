@@ -100,7 +100,7 @@ router.get('/getconnreq', (req, res) => {
     db.one(`select memberid from members where email = $1`, [email]).then(row => {
         console.log(email);
         console.log(row);
-        db.many(`SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
+        db.many(`SELECT email, memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
         FROM Members
         JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_b = $1 AND verified = 0) as C
         ON memberid_a = memberid`, 
@@ -115,7 +115,7 @@ router.get('/getconnreq', (req, res) => {
             console.log(err);
             res.send({
                 success:false, 
-                message:'You are all caught up!'
+                message:'You no current requests'
             })
         })
     }).catch(err=>{
@@ -128,7 +128,7 @@ router.get('/getconnreq', (req, res) => {
     db.one(`select memberid from members where email = $1`, [email]).then(row => {
         console.log(email);
         console.log(row);
-        db.many(`SELECT memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
+        db.many(`SELECT email, memberid, firstname, lastname, username, C.memberid_a, C.memberid_b, C.verified
         FROM Members
         JOIN (SELECT memberid_a, memberid_b, verified FROM Contacts WHERE memberid_a = $1 AND verified = 0) as C
         ON memberid_b = memberid`, 
@@ -143,7 +143,7 @@ router.get('/getconnreq', (req, res) => {
             console.log(err);
             res.send({
                 success:false, 
-                message:'You are all caught up!'
+                message:'You have no pending sent requests'
             })
         })
     }).catch(err=>{
@@ -162,39 +162,20 @@ router.get('/getconnreq', (req, res) => {
  * If DENY reverse order. 
  */
 router.get('/cancel', (req, res) => {
-    let email_a = req.query['email_a'];
-    let email_b = req.query['email_b'];
-    db.one('select memberid from members where email = $1', [email_a]).then(row => {
-        let memberid_a = row['memberid'];
-        db.one('select memberid from members where email = $1', [email_b]).then(row => {
-            let memberid_b = row['memberid'];
-            
+    let memberid_a = req.query['memberid_a'];
+    let memberid_b = req.query['memberid_b'];         
             db.one('DELETE FROM CONTACTS WHERE (memberid_a = $1) AND (memberid_b = $2) RETURNING *',[ memberid_a, memberid_b])
             .then(() => {
                 res.send({
-                    succes: true,
+                    success: true,
                     msg: "Removed contact request"
                 });
             }).catch( err => {
                 res.send({
                     success: false, 
-                    msg: "Failed to delete request "
-    
+                    msg: "Failed to delete request "  
                 })
             })
-        }).catch( err => {
-            res.send({
-                succes: false, 
-                msg: "Member b not found"
-    
-            })      
-        });
-    }).catch( err => {
-        res.send({
-            success: false, 
-            msg: "Member a not found"
-        })
-    })
     });
 
 router.post('/connReq',  (req, res) => {
@@ -206,7 +187,8 @@ router.post('/connReq',  (req, res) => {
             let receiverId = row.memberid;
             let insert = 'INSERT INTO Contacts(MemberID_A, MemberID_B, verified) VALUES ($1, $2, 0)';
             let select = 'SELECT * FROM Contacts WHERE MemberID_A = $1 AND MemberID_B = $2';
-
+            
+            //check to make sure contacts don't already exist?
             db.none(select, [sender, receiverId]).then(() =>{
                 db.none(insert, [sender, receiverId]).then (() => {
                     db.one(select, [sender, receiverId]).then(() => {
@@ -321,9 +303,9 @@ router.post('/convoReq',  (req, res) => {
 
 
 
-router.post('/connApprove', (req, res) => {
-    let sender = req.body['email_a'];
-    let receiver = req.body['email_b'];
+router.get('/connApprove', (req, res) => {
+    let sender = req.query['email_a'];
+    let receiver = req.query['email_b'];
 
     let select = 'SELECT verified FROM CONTACTS WHERE MemberID_B = $1 AND MemberID_A = $2';
     let getUserName = 'SELECT memberID FROM members WHERE email = $1'
@@ -557,5 +539,37 @@ router.post('/connReceived', (req, res) => {
     })
 
 })
+
+router.post('/convoAdd', (req, res) => {
+    let email = req.body['email'];
+    let chatID = req.body['chatID'];
+
+    let getUserID = 'SELECT memberID FROM members WHERE email = $1';
+    let insert = 'INSERT INTO chatmembers(chatid, memberid) VALUES ($1, $2)';
+
+    db.one(getUserID, email).then(row => {
+        memberID = row.memberid;
+
+        db.none(insert, [chatID, memberID]).then(row => {
+            res.send({
+                "success":"true"
+            })
+        }).catch(err => {
+            res.send({
+                "success":"false",
+                "error": err.msg,
+                "time": "insert members into chat"
+            })
+        })
+
+    }).catch(err=> {
+        res.send({
+            "success":"false",
+            "error": err.msg,
+            "time": "retrieve userid"
+        })
+    })
+})
+
 
 module.exports = router;
