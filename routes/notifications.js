@@ -57,6 +57,7 @@ router.post('/clearnotification', (req, res) => {
         db.none(`delete from notifications where notetype = 'msg' and email_b = $1 and chatid = $2`, [email_b, chatid]).then(()=>{
             res.send({
                 "success":true,
+                "type":"msgById",
                 "message":"notifications of chatid" + chatid + "deleted from database."
             })
         })
@@ -64,6 +65,7 @@ router.post('/clearnotification', (req, res) => {
         db.none(`delete from notifications where notetype = 'msg' and email_b = $1`, [email_b]).then(()=>{
             res.send({
                 "success":true,
+                "type":"msg",
                 "message":"notifications of all chat deleted from database."
             })
         })
@@ -72,6 +74,7 @@ router.post('/clearnotification', (req, res) => {
             db.none(`delete from notifications where notetype = 'convoreq' and email_b = $1`, [email_b]).then(()=>{
                 res.send({
                     "success":true,
+                    "type":"reqs",
                     "message":"notifications of all requests deleted from database."
                 })
             })
