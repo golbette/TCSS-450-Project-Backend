@@ -457,7 +457,7 @@ router.post('/connSent', (req, res) => {
 
 router.post('/getConvos', (req, res) => {
     let sender = req.body['email'];
-    let selectChat = `SELECT A.chatid, A.name, A.approved, U.firstname, U.lastname, U.username, U.memberid FROM chats as A
+    let selectChat = `SELECT A.chatid, A.approved, U.firstname, U.lastname, U.username, U.memberid FROM chats as A
     JOIN (SELECT chatid, memberid FROM chatmembers WHERE memberid = $1) as C
     ON A.chatid = C.chatid
     JOIN (SELECT chatid, memberid FROM chatmembers) as M
