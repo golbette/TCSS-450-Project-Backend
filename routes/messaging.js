@@ -82,7 +82,7 @@ router.post('/send', (req, res) => {
 router.post('/getchats', (req, res) => {
     let email = req.body['email'];
     // Gets you the member id of the user based on the user's email.
-    db.one('select memberid from members where email = $1', [email]).then(memberid=>{
+    db.one('select username, memberid from members where email = $1', [email]).then(memberid=>{
         // Gets you a list of chat ids that the user participated in.
         db.any('select chatid from chatmembers where memberid=$1 order by chatid asc', [memberid.memberid]).then(chatIds => {
             // Returns other members' information based on chatids associated with the user.
@@ -90,7 +90,8 @@ router.post('/getchats', (req, res) => {
                 res.send({
                     success:true, 
                     chatids:chatIds, 
-                    memberinfos:membersInfoByChatId
+                    memberinfos:membersInfoByChatId,
+                    username:memberid.username
                 })
             }).catch(err=>{
                 res.send({
