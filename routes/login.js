@@ -8,11 +8,13 @@ let getHash = require('../utilities/utils').getHash;
 
 var router = express.Router();
 
+let sendEmail = require('../utilities/utils').sendEmail;
+
 const bodyParser = require("body-parser");
 //This allows parsing of the body of POST requests, that are encoded in JSON
 router.use(bodyParser.json());
 
-//Pull in the JWT module along with out asecret key
+//Pull in the JWT module along with our secret key
 let jwt = require('jsonwebtoken');
 let config = {
     secret: process.env.JSON_WEB_TOKEN
@@ -88,5 +90,84 @@ router.post('/', (req, res) => {
         });
     }
 });
+
+//Endpoint for "Reset Password"
+//Pre: email for account to reset is provided, along with the new password
+//Post: The new password becomes the account's password
+router.post("/resetpw", (req, res) => {
+    let email = req.body['email'];
+    let newpw = req.body['newpassword'];
+    let select = 'SELECT memberID FROM members WHERE email = $1';
+
+    db.one(select, [email]).then(row=> {
+        memberid = row.memberid;
+
+        let update = 'UPDATE members SET password = $1 WHERE memberid = $2';
+
+        db.none(update, [newpw, memberid]).then(() => {
+            res.send({
+                "success" : true
+            })
+        }).catch(err => {
+            res.send({
+                "success" : false,
+                "error" : err.message,
+                "time" : "Update row"
+            })
+        })
+    }).catch(err => {
+        res.send({
+            "success" : false,
+            "error" : err.message,
+            "time" : "get user"
+        })
+    })
+
+})
+
+//Endpoint for "Forgot Password"
+//Pre: email for account to reset is provided
+//Post: An email with a new, random password is sent to the account, 
+//and that password becomes the account's password
+router.post("/forgotpw", (req, res) => {
+    let email = req.body['email'];
+    let select = 'SELECT memberID FROM members WHERE email = $1';
+    let update = 'UPDATE members SET password = $1 WHERE memberid = $2';
+
+    db.one(select, [email]).then(row => {
+        memberid = row.memberid;
+
+        //generate a random new password
+        let hex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F'];
+        let pw = '', i;
+        for (i = 0; i < 20; i++) {
+            pw = pw + hex[Math.floor(Math.random() * 16)];
+        }
+
+        //update table and send email
+        db.none(update).then(() => {
+            sendEmail(email, "Your Batherer Account", "Your new password is" + pw);
+            res.send({
+                "success" : true
+            })
+        }).catch(err => {
+            res.send({
+                "success" : false,
+                "err" : err.message,
+                "time" : "Update table"
+            })
+        })
+        
+        
+    }).catch(err => {
+        res.send({
+            "success" : false,
+            "err" : err.message,
+            "time" : "get user"
+        })
+    })
+
+    
+})
 
 module.exports = router;
