@@ -1,4 +1,4 @@
-const DARK_SKY_API = 'a574c79fa3aa8048944b142ee613a09b';
+// const DARK_SKY_API = 'a574c79fa3aa8048944b142ee613a09b';
 
 const express = require('express');
 
@@ -87,7 +87,7 @@ if(desiredLocation) {
                 if(err){
                     return res.send({
                         success: false, 
-                        msg: "Unable to retrieve weather from try using lat lon"
+                        msg: "Unable to retrieve weather try using lat lon"
                     });
                 } else {
                     
@@ -271,7 +271,7 @@ router.put('/coordinates', (req, res) => {
     }).catch((err) => {
         return res.send({
             succes: false,
-            error: "Memebr Id not found"
+            error: "Memeber Id not found"
         })
     });
 });
@@ -327,7 +327,7 @@ router.delete('/location', (req, res) => {
     }).catch((err) => {
         res.send({
             success: false, 
-            error: "Memebr Id not found"
+            error: "Memeber Id not found"
         })
     });
 });
