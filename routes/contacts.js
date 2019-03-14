@@ -9,13 +9,15 @@ let msg_functions = require('../utilities/utils.js').messaging;
 const REQUEST_ID = 21;
 
 /**
- * Searche within the members database for tuples that matches the input. 
+ * Search within the members database for tuples that matches the input. 
  * Username, First Name, Last Name, and Email are accepted as input.
  */
 router.post('/searchcontacts', (req, res) => {
     let input = req.body['input'];
     let email = req.body['email'];
-    db.any(`select memberid, firstname, lastname, username, email from members where email LIKE '%'||$1||'%' OR firstname LIKE '%'||$1||'%' OR lastname LIKE '%'||$1||'%' or username LIKE '%'||$1||'%' except select memberid, firstname, lastname, username, email from members where email = $2`, [input, email]).then(rows => {
+    db.any(`select memberid, firstname, lastname, username, email from members where email LIKE '%'||$1||'%' OR 
+    firstname LIKE '%'||$1||'%' OR lastname LIKE '%'||$1||'%' or username LIKE '%'||$1||'%' except select memberid, firstname, lastname, username, email 
+    from members where email = $2`, [input, email]).then(rows => {
         if (rows.length === 0) {
             res.send({
                 success:true,
@@ -61,7 +63,9 @@ router.post('/getcontacts', (req, res) => {
     db.one('select memberid from members where email=$1', [email]).then(row => {
 
 
-        db.any('select members.firstname, members.lastname, members.email, members.username from members where members.memberid = any (select memberid_b from contacts where memberid_a=$1 and verified = 1) or members.memberid = any (select memberid_a from contacts where memberid_b=$1 and verified = 1)', [row.memberid]).then(rows => {
+        db.any(`select members.firstname, members.lastname, members.email, members.username from members where members.memberid = 
+        any (select memberid_b from contacts where memberid_a=$1 and verified = 1) or members.memberid = any (select memberid_a from contacts where memberid_b=$1 and verified = 1)`,
+         [row.memberid]).then(rows => {
             res.send({
                 success:true,
                 message:rows
@@ -87,7 +91,7 @@ router.post('/getcontacts', (req, res) => {
 /**
  * Get pending connection requests. 
  * just pass in the email to see who sent the user a request 
- * and pass in a int for 'pending' to return the requests that user has 
+ * and pass in a 1 for "pending" to return the requests that user has 
  * sent. 
  */
 router.get('/getconnreq', (req, res) => {

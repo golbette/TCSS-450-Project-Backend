@@ -1,4 +1,9 @@
-// const DARK_SKY_API = 'a574c79fa3aa8048944b142ee613a09b';
+/**
+ * Weather API class. Retrieves forecasts from 
+ * Dark Sky weather API and Yahoo API. Retrieve hourly, current, 
+ * and ten day forecast using {city, state}, 
+ * {city}, {state}, {zip}, or {lat, long}
+ */
 
 const express = require('express');
 
@@ -13,6 +18,7 @@ var header = {
     "Yahoo-App-Id": process.env.WEATHER_YAHOO_APP_ID
 };
 
+/**  OAuth Request required for yahoo API */
 var request = new OAuth.OAuth(
     null,
     null,
@@ -217,14 +223,14 @@ router.put('/location', (req, res) => {
  */
 router.put('/coordinates', (req, res) => {
     res.type("application/json");
-   /** Parse data */
+  
 
    let username = req.query['username'];
    let lat = req.query['lat'];
    let lon = req.query['lon'];
    let nickname = req.query['nickname'];
   
-   /**Information required to store users prefered location in DB. */
+   
    if(!username) {
        return res.send({
            success: false,
@@ -332,7 +338,10 @@ router.delete('/location', (req, res) => {
     });
 });
 
-
+/**
+ * Pass in user name and return all the users favorited 
+ * locations. 
+ */
 router.get('/location/users', (req, res) => {
     res.type("application/json");
    /** Parse data */
