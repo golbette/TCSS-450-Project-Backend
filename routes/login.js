@@ -92,27 +92,28 @@ router.post('/', (req, res) => {
 //Post: The new password becomes the account's password
 router.post("/resetpw", (req, res) => {
     let email = req.body['email'];
+    let oldpw = req.body['oldpassword'];
     let newpw = req.body['newpassword'];
-    let select = 'SELECT memberID FROM members WHERE email = $1';
+    // let select = 'SELECT memberID FROM members WHERE email = $1';
+    db.one('SELECT Password, Salt, Activated, firstname, Memberid FROM Members WHERE email=$1', [email]).then(row => {
+        let saltedPassword = row.password;
+        let saltedOldpw = getHash(oldpw, row.salt);
 
-    db.one(select, [email]).then(row=> {
-        memberid = row.memberid;
-        let salt = crypto.randomBytes(32).toString("hex");
-        let salted_hash = getHash(newpw, salt);
+        if (saltedOldpw === saltedPassword) {
+            let saltedNewpw = getHash(newpw, row.salt);
 
-        let update = 'UPDATE members SET password = $1, salt = $2 WHERE memberid = $3';
-
-        db.none(update, [salted_hash, salt, memberid]).then(() => {
-            res.send({
-                "success" : true
+            db.none('UPDATE members SET password = $1 WHERE email = $2', [saltedNewpw, email]).then(() => {
+                res.send({
+                    "success" : true
+                })
+            }).catch(err => {
+                res.send({
+                    "success" : false,
+                    "error" : err.message,
+                    "time" : "Update row"
+                })
             })
-        }).catch(err => {
-            res.send({
-                "success" : false,
-                "error" : err.message,
-                "time" : "Update row"
-            })
-        })
+        }
     }).catch(err => {
         res.send({
             "success" : false,
@@ -120,7 +121,6 @@ router.post("/resetpw", (req, res) => {
             "time" : "get user"
         })
     })
-
 })
 
 //Endpoint for "Forgot Password"
