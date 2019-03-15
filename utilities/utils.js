@@ -35,7 +35,7 @@ async function sendEmail(receiver, subj, message) {
         if (error) {
             console.log(error);
         } else {
-        console.log('Email sent: ' + info.response);
+            console.log('Email sent: ' + info.response);
         }
     }); 
 }
@@ -71,7 +71,29 @@ p    {color: #847996;}
 }
 
 
+async function sendResetPasswordEmail(from, receiver, subj, message) {
+    let finalMessage = (`<html> 
+    <head>
+    <style>
+    body {background-color: black;}
+    h1   {color: #310a31;}
+    p    {color: #847996;}
+    </style></head>
+    <body> 
+                    <div> 
+                    <h1>Thanks for Using Blatherer!</h1>
+                    <p>This is your temporary password: </p>
+                    <p> ${message}</p>
+                    <p></p>
+                    <p>Please remember to change your password by using the Reset Password function in the App settings.</p>
+                    </div> 
+                    </body>  
+                    </html>`);
+    
+          return await sendEmail(from, receiver, subj, finalMessage);
+    }
+
 
 module.exports = { 
-    db, getHash, sendEmail, messaging, sendRegistrationEmail
+    db, getHash, sendEmail, messaging, sendRegistrationEmail, sendResetPasswordEmail
 };
