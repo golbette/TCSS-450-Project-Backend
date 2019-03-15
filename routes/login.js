@@ -155,7 +155,7 @@ router.post("/forgotpw", (req, res) => {
             pw = pw + hex[Math.floor(Math.random() * 16)];
         }
 
-        let salted_hash = getHash(newpw, salt);
+        let salted_hash = getHash(pw, salt);
 
         //update table and send email
         db.none(update, [salted_hash, salt, memberid]).then(() => {
