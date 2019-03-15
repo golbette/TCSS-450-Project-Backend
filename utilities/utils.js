@@ -5,13 +5,8 @@ let messaging = require('./pushy_services.js');
 //We use this create the SHA256 hash
 const crypto = require("crypto");
 
-async function sendEmail(from, receiver, subj, message) {
-  //research nodemailer for sending email from node.
-  // https://nodemailer.com/about/
-  // https://www.w3schools.com/nodejs/nodejs_email.asp
-  //create a burner gmail account 
-  //make sure you add the password to the environmental variables
-  //similar to the DATABASE_URL and PHISH_DOT_NET_KEY (later section of the lab)
+async function sendEmail(receiver, subj, message) {
+
 
   //fake sending an email for now. Post a message to logs. 
   console.log('Email sent: ' + message);
@@ -72,7 +67,7 @@ p    {color: #847996;}
                 </body>  
                 </html>`);
 
-      return await sendEmail(from, receiver, subj, finalMessage);
+      return await sendEmail(receiver, subj, finalMessage);
 }
 
 
