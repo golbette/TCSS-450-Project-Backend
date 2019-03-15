@@ -11,6 +11,10 @@ var router = express.Router();
 let sendEmail = require('../utilities/utils').sendEmail;
 
 const bodyParser = require("body-parser");
+
+//We use this create the SHA256 hash
+const crypto = require("crypto");
+
 //This allows parsing of the body of POST requests, that are encoded in JSON
 router.use(bodyParser.json());
 
@@ -134,7 +138,7 @@ router.post("/resetpw", (req, res) => {
 router.post("/forgotpw", (req, res) => {
     let email = req.body['email'];
     let select = 'SELECT memberID FROM members WHERE email = $1';
-    let update = 'UPDATE members SET password = $1 WHERE memberid = $2';
+
 
     db.one(select, [email]).then(row => {
         memberid = row.memberid;
