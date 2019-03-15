@@ -12,11 +12,12 @@ var router = express.Router();
 
 let sendResetPasswordEmail = require('../utilities/utils').sendResetPasswordEmail;
 
+//This allows parsing of the body of POST requests, that are encoded in JSON
 const bodyParser = require("body-parser");
 
 //We use this create the SHA256 hash
 const crypto = require("crypto");
-//This allows parsing of the body of POST requests, that are encoded in JSON
+
 router.use(bodyParser.json());
 
 //Pull in the JWT module along with our secret key
