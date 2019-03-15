@@ -14,6 +14,10 @@ let sendResetPasswordEmail = require('../utilities/utils').sendResetPasswordEmai
 
 const bodyParser = require("body-parser");
 //This allows parsing of the body of POST requests, that are encoded in JSON
+
+//We use this create the SHA256 hash
+const crypto = require("crypto");
+
 router.use(bodyParser.json());
 
 //Pull in the JWT module along with our secret key
