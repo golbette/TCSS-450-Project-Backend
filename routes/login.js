@@ -8,8 +8,6 @@ let getHash = require('../utilities/utils').getHash;
 
 var router = express.Router();
 
-// let sendEmail = require('../utilities/utils').sendEmail;
-
 let sendResetPasswordEmail = require('../utilities/utils').sendResetPasswordEmail;
 
 //This allows parsing of the body of POST requests, that are encoded in JSON
@@ -146,7 +144,6 @@ router.post("/forgotpw", (req, res) => {
         //update table and send email
         db.none('UPDATE members SET password = $1 WHERE memberid = $2', [newSaltedHash, row.memberid]).then(() => {
             sendResetPasswordEmail("uwnetid@uw.edu", email, first + ", You've Requested a Password Reset", pw);
-            // sendEmail(email, "Your Batherer Account", "Please remember to change your password once you are logged in with the tempory password. Your temopary password is: " + pw);
             res.send({
                 "success" : true
             })

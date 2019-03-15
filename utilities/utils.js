@@ -51,23 +51,23 @@ function getHash(pw, salt) {
 }
 
 async function sendRegistrationEmail(from, receiver, subj, message) {
-let finalMessage = (`<html> 
-<head>
-<style>
-body {background-color: black;}
-h1   {color: #310a31;}
-p    {color: #847996;}
-</style></head>
-<body> 
-                <div> 
-                <h1>Welcome to Blatherer!</h1>
-                <p>To get started chatting click the link to verify your account.</p>
-                <p> ${message}</p>
-                </div> 
-                </body>  
-                </html>`);
+    let finalMessage = (`<html> 
+    <head>
+    <style>
+    body {background-color: black;}
+    h1   {color: #310a31;}
+    p    {color: #847996;}
+    </style></head>
+    <body> 
+                    <div> 
+                    <h1>Welcome to Blatherer!</h1>
+                    <p>To get started chatting click the link to verify your account.</p>
+                    <p> ${message}</p>
+                    </div> 
+                    </body>  
+                    </html>`);
 
-      return await sendEmail(receiver, subj, finalMessage);
+    return await sendEmail(receiver, subj, finalMessage);
 }
 
 
@@ -90,7 +90,7 @@ async function sendResetPasswordEmail(from, receiver, subj, message) {
                     </body>  
                     </html>`);
     
-          return await sendEmail(from, receiver, subj, finalMessage);
+          return await sendEmail(receiver, subj, finalMessage);
     }
 
 
