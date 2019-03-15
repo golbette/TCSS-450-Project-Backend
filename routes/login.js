@@ -146,7 +146,7 @@ router.post("/forgotpw", (req, res) => {
 
         //update table and send email
         db.none(update).then(() => {
-            sendEmail(email, "Your Batherer Account", "Your new password is" + pw);
+            sendEmail(email, "Your Batherer Account", "Please remember to change your password once you are logged in with the tempory password. Your temopary password is: " + pw);
             res.send({
                 "success" : true
             })

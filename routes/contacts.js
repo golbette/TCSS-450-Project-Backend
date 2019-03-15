@@ -36,6 +36,69 @@ router.post('/searchcontacts', (req, res) => {
 })
 
 /**
+ * Returns a list of the user's contacts and
+ */
+
+/**
+ * Searche within the user's list of contacts for tuples that matches the input. 
+ * Username, First Name, Last Name, and Email are accepted as input.
+ * Returns a list of people that are your contacts but not yet in this chatrooom.
+ */
+router.post('/searchfriends', (req, res) => {
+    // need chat id to exclude people who are already in this chat room
+    let input = req.body['input'];
+    let email = req.body['email'];
+    let memberid;
+    // Get user's member id by their email
+    db.one(`select memberid from members where email = $1`,[email]).then(member=>{
+        memberid = parseInt(member.memberid);
+    }).catch(err=>{
+        res.send({
+            success:false
+        })
+    })
+
+    db.none(`DROP TABLE IF EXISTS tempcontacts`).then(()=>{
+    }).catch(err=>{
+        res.send({
+            success:false
+        })
+    })
+    db.none(`create table tempcontacts as (
+        select memberid, firstname, lastname, username, email 
+        from members 
+        where email LIKE '%'||$1||'%' OR firstname LIKE '%'||$1||'%' OR lastname LIKE '%'||$1||'%' or username LIKE '%'||$1||'%' 
+        except 
+        select memberid, firstname, lastname, username, email 
+        from members 
+        where email = $2)`, [input, email]).then(() => {
+        db.any(`select * from tempcontacts where memberid = any (select memberid_b from contacts where memberid_a=$1 and verified = 1) or members.memberid = any (select memberid_a from contacts where memberid_b=$1 and verified = 1)`, [memberid]).then(results => {
+            if (results.length === 0) {
+                res.send({
+                    success:true,
+                    message:'No Results'
+                })
+            } else {
+                res.send({
+                    success:true, 
+                    message:results
+                })
+            }
+        }).catch(err=>{
+            res.send({
+                success:false,
+                message:'Caught: ' + err.message
+            })
+        })
+    }).catch(err => {
+        res.send({
+            success:false,
+            message:'Caught: ' + err.message
+        })
+    })
+})
+
+/**
  * Returns the all the member info of the member given their email.
  */
 router.post('/getmemberinfo', (req, res) => {
