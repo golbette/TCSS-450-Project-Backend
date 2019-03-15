@@ -8,7 +8,9 @@ let getHash = require('../utilities/utils').getHash;
 
 var router = express.Router();
 
-let sendEmail = require('../utilities/utils').sendEmail;
+// let sendEmail = require('../utilities/utils').sendEmail;
+
+let sendResetPasswordEmail = require('../utilities/utils').sendResetPasswordEmail;
 
 const bodyParser = require("body-parser");
 //This allows parsing of the body of POST requests, that are encoded in JSON
@@ -29,19 +31,14 @@ router.post('/', (req, res) => {
         db.one('SELECT Password, Salt, Activated, Username FROM Members WHERE email=$1', [email])
         .then(row => { //If successful, run function passed into .then()
             let active = row['activated']
-
             let salt = row['salt'];
             //Retrieve our copy of the password
             let ourSaltedHash = row['password']; 
-
-            let username = row['username'];
-            
+            let username = row['username'];  
             //Combined their password with our salt, then hash
             let theirSaltedHash = getHash(theirPw, salt); 
-
             //Did our salted hash match their salted hash?
             let wasCorrectPw = ourSaltedHash === theirSaltedHash; 
-
             if (active === 1) {
                 if (wasCorrectPw) {
                     //credentials match. get a new JWT
@@ -65,17 +62,14 @@ router.post('/', (req, res) => {
                         message: 'Credentials did not match'
                     });
                 }
-            }
-            else {
+            } else {
                 //password not activated
                 res.send({
                     success: false,
                     message: 'Please check your email'
                 });
             }
-        })
-        //More than one row shouldn't be found, since table has constraint on it
-        .catch((err) => {
+        }).catch((err) => { //More than one row shouldn't be found, since table has constraint on it
             //If anything happened, it wasn't successful
             res.send({
                 success: false,
@@ -131,22 +125,23 @@ router.post("/resetpw", (req, res) => {
 //and that password becomes the account's password
 router.post("/forgotpw", (req, res) => {
     let email = req.body['email'];
-    let select = 'SELECT memberID FROM members WHERE email = $1';
-    let update = 'UPDATE members SET password = $1 WHERE memberid = $2';
 
-    db.one(select, [email]).then(row => {
-        memberid = row.memberid;
+    db.one('SELECT Password, Salt, Activated, firstname, Memberid FROM Members WHERE email=$1', [email]).then(row => {
+        let salt = row['salt'];
 
         //generate a random new password
         let hex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F'];
-        let pw = '', i;
-        for (i = 0; i < 20; i++) {
+        let pw = '';
+        for (let i = 0; i < 8; i++) {
             pw = pw + hex[Math.floor(Math.random() * 16)];
         }
-
+        //Combined their password with our salt, then hash
+        let newSaltedHash = getHash(pw, salt); 
+        let first = row.firstname;
         //update table and send email
-        db.none(update).then(() => {
-            sendEmail(email, "Your Batherer Account", "Please remember to change your password once you are logged in with the tempory password. Your temopary password is: " + pw);
+        db.none('UPDATE members SET password = $1 WHERE memberid = $2', [newSaltedHash, row.memberid]).then(() => {
+            sendResetPasswordEmail("uwnetid@uw.edu", email, first + ", You've Requested a Password Reset", pw);
+            // sendEmail(email, "Your Batherer Account", "Please remember to change your password once you are logged in with the tempory password. Your temopary password is: " + pw);
             res.send({
                 "success" : true
             })
@@ -157,17 +152,14 @@ router.post("/forgotpw", (req, res) => {
                 "time" : "Update table"
             })
         })
-        
-        
-    }).catch(err => {
+    }).catch((err) => { //More than one row shouldn't be found, since table has constraint on it
+        //If anything happened, it wasn't successful
         res.send({
-            "success" : false,
-            "err" : err.message,
-            "time" : "get user"
-        })
-    })
-
-    
+            success: false,
+            message: 'Credentials did not match',
+            error: err
+        });
+    });
 })
 
 module.exports = router;
