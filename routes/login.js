@@ -14,7 +14,6 @@ const bodyParser = require("body-parser");
 
 //We use this create the SHA256 hash
 const crypto = require("crypto");
-
 //This allows parsing of the body of POST requests, that are encoded in JSON
 router.use(bodyParser.json());
 
@@ -110,7 +109,7 @@ router.post("/resetpw", (req, res) => {
 
         let update = 'UPDATE members SET password = $1, salt = $2 WHERE memberid = $3';
 
-        db.none(update, [newpw, salted_hash, memberid]).then(() => {
+        db.none(update, [salted_hash, salt, memberid]).then(() => {
             res.send({
                 "success" : true
             })
@@ -158,7 +157,7 @@ router.post("/forgotpw", (req, res) => {
         }
 
         //update table and send email
-        db.none(update, [pw, salted_hash, memberid]).then(() => {
+        db.none(update, [salted_hash, salt, memberid]).then(() => {
             sendEmail(email, "Your Batherer Account", "Your new password is" + pw);
             res.send({
                 "success" : true
