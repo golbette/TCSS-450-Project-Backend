@@ -13,6 +13,9 @@ var router = express.Router();
 let sendResetPasswordEmail = require('../utilities/utils').sendResetPasswordEmail;
 
 const bodyParser = require("body-parser");
+
+//We use this create the SHA256 hash
+const crypto = require("crypto");
 //This allows parsing of the body of POST requests, that are encoded in JSON
 
 //We use this create the SHA256 hash
@@ -99,10 +102,12 @@ router.post("/resetpw", (req, res) => {
 
     db.one(select, [email]).then(row=> {
         memberid = row.memberid;
+        let salt = crypto.randomBytes(32).toString("hex");
+        let salted_hash = getHash(newpw, salt);
 
-        let update = 'UPDATE members SET password = $1 WHERE memberid = $2';
+        let update = 'UPDATE members SET password = $1, salt = $2 WHERE memberid = $3';
 
-        db.none(update, [newpw, memberid]).then(() => {
+        db.none(update, [salted_hash, salt, memberid]).then(() => {
             res.send({
                 "success" : true
             })
@@ -129,11 +134,16 @@ router.post("/resetpw", (req, res) => {
 //and that password becomes the account's password
 router.post("/forgotpw", (req, res) => {
     let email = req.body['email'];
-
     db.one('SELECT Password, Salt, Activated, firstname, Memberid FROM Members WHERE email=$1', [email]).then(row => {
         let salt = row['salt'];
 
-        //generate a random new password
+
+        //generate new salted hash, season that tastey password lads
+        let salt = crypto.randomBytes(32).toString("hex");
+        
+        let update = 'UPDATE members SET password = $1, salt = $2 WHERE memberid = $3';
+
+        //generate a random new password using hexcode from before
         let hex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F'];
         let pw = '';
         for (let i = 0; i < 8; i++) {
