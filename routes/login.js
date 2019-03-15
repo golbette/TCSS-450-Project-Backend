@@ -134,12 +134,6 @@ router.post("/forgotpw", (req, res) => {
     db.one('SELECT Password, Salt, Activated, firstname, Memberid FROM Members WHERE email=$1', [email]).then(row => {
         let salt = row['salt'];
 
-
-        //generate new salted hash, season that tastey password lads
-        let salt = crypto.randomBytes(32).toString("hex");
-        
-        let update = 'UPDATE members SET password = $1, salt = $2 WHERE memberid = $3';
-
         //generate a random new password using hexcode from before
         let hex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F'];
         let pw = '';
