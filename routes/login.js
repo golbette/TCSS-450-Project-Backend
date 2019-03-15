@@ -159,7 +159,7 @@ router.post("/forgotpw", (req, res) => {
 
         //update table and send email
         db.none(update, [salted_hash, salt, memberid]).then(() => {
-            sendEmail(email, "Your Blatherer Account", "Your new password is" + pw);
+            sendEmail(email, "Your Blatherer Account", "Your new password is " + pw + "/n Please remember to change your password after logging in.");
             res.send({
                 "success" : true
             })
