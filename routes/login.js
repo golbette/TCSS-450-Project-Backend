@@ -145,8 +145,7 @@ router.post("/forgotpw", (req, res) => {
 
         //generate new salted hash, season that tastey password lads
         let salt = crypto.randomBytes(32).toString("hex");
-        let salted_hash = getHash(newpw, salt);
-
+        
         let update = 'UPDATE members SET password = $1, salt = $2 WHERE memberid = $3';
 
         //generate a random new password using hexcode from before
@@ -155,6 +154,8 @@ router.post("/forgotpw", (req, res) => {
         for (i = 0; i < 20; i++) {
             pw = pw + hex[Math.floor(Math.random() * 16)];
         }
+
+        let salted_hash = getHash(newpw, salt);
 
         //update table and send email
         db.none(update, [salted_hash, salt, memberid]).then(() => {
