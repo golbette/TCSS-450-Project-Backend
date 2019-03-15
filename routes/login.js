@@ -101,10 +101,12 @@ router.post("/resetpw", (req, res) => {
 
     db.one(select, [email]).then(row=> {
         memberid = row.memberid;
+        let salt = crypto.randomBytes(32).toString("hex");
+        let salted_hash = getHash(newpw, salt);
 
-        let update = 'UPDATE members SET password = $1 WHERE memberid = $2';
+        let update = 'UPDATE members SET password = $1, salt = $2 WHERE memberid = $3';
 
-        db.none(update, [newpw, memberid]).then(() => {
+        db.none(update, [newpw, salted_hash, memberid]).then(() => {
             res.send({
                 "success" : true
             })
@@ -137,7 +139,14 @@ router.post("/forgotpw", (req, res) => {
     db.one(select, [email]).then(row => {
         memberid = row.memberid;
 
-        //generate a random new password
+
+        //generate new salted hash, season that tastey password lads
+        let salt = crypto.randomBytes(32).toString("hex");
+        let salted_hash = getHash(newpw, salt);
+
+        let update = 'UPDATE members SET password = $1, salt = $2 WHERE memberid = $3';
+
+        //generate a random new password using hexcode from before
         let hex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F'];
         let pw = '', i;
         for (i = 0; i < 20; i++) {
@@ -145,7 +154,7 @@ router.post("/forgotpw", (req, res) => {
         }
 
         //update table and send email
-        db.none(update).then(() => {
+        db.none(update, [pw, salted_hash, memberid]).then(() => {
             sendEmail(email, "Your Batherer Account", "Your new password is" + pw);
             res.send({
                 "success" : true
