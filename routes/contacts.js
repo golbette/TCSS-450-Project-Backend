@@ -254,9 +254,9 @@ router.post('/connReq',  (req, res) => {
             let select = 'SELECT * FROM Contacts WHERE MemberID_A = $1 AND MemberID_B = $2';
             
             //check to make sure contacts don't already exist?
-            db.none(select, [sender, receiverId]).then(() =>{
-                db.none(insert, [sender, receiverId]).then (() => {
-                    db.one(select, [sender, receiverId]).then(() => {
+            db.none(select, [senderId, receiverId]).then(() =>{
+                db.none(insert, [senderId, receiverId]).then (() => {
+                    db.one(select, [senderId, receiverId]).then(() => {
                         // Send a notification of this request to involved members with registered tokens
                         db.one('SELECT * FROM Push_Token where memberid = $1', [receiverId]).then(row => {
                             console.log('receiverId: ' + receiverId + ' push token: ' + row.token);
