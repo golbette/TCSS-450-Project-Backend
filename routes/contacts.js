@@ -244,10 +244,12 @@ router.get('/cancel', (req, res) => {
 router.post('/connReq',  (req, res) => {
     let email = req.body['email_a'];
     let receiver = req.body['email_b'];
-    db.one('select memberid from members where email = $1', [email]).then(row=>{
-        let sender = row.memberid;
-        db.one('select memberid from members where email = $1', [receiver]).then(row=>{
+    db.one('select username, memberid from members where email = $1', [email]).then(row=>{
+        let senderId = row.memberid;
+        let senderUsername = row.username;
+        db.one('select username, memberid from members where email = $1', [receiver]).then(row=>{
             let receiverId = row.memberid;
+            let receiverUsername = row.username;
             let insert = 'INSERT INTO Contacts(MemberID_A, MemberID_B, verified) VALUES ($1, $2, 0)';
             let select = 'SELECT * FROM Contacts WHERE MemberID_A = $1 AND MemberID_B = $2';
             
@@ -258,25 +260,30 @@ router.post('/connReq',  (req, res) => {
                         // Send a notification of this request to involved members with registered tokens
                         db.one('SELECT * FROM Push_Token where memberid = $1', [receiverId]).then(row => {
                             console.log('receiverId: ' + receiverId + ' push token: ' + row.token);
-                            db.one('select username from members where memberid = $1', [sender]).then(row=>{
-                                // msg_functions.sendToIndividual(row.token, '', row.username, REQUEST_ID); // This line is currently bugged. Will fix it later.
-                                db.none(`insert into notifications (chatid, email_a, email_b, notetype) values(21, $1, $2, 'connreq')`, [email, receiver]).then(()=>{
-                                    res.send({
-                                        success:true,
-                                        message:"notification sent"
-                                    })
-                                }).catch(err=>{
-                                    res.send({
-                                        success:false,
-                                        message:"failed to insert notifications" + err.message
-                                    })
+                            // db.one('select username from members where memberid = $1', [sender]).then(row=>{
+                                
+                                
+                            msg_functions.sendToIndividual(row.token, '', senderUsername, receiverUsername, REQUEST_ID); // This line is currently bugged. Will fix it later.
+                            // msg_functions.sendToIndividual(element['token'], message, username, receivers.username, chatId);
+                            
+                            
+                            db.none(`insert into notifications (chatid, email_a, email_b, notetype) values(21, $1, $2, 'connreq')`, [email, receiver]).then(()=>{
+                                res.send({
+                                    success:true,
+                                    message:"notification sent"
                                 })
                             }).catch(err=>{
                                 res.send({
                                     success:false,
-                                    message:"can't find sender username with sender id" + err.message
+                                    message:"failed to insert notifications" + err.message
                                 })
                             })
+                            // }).catch(err=>{
+                            //     res.send({
+                            //         success:false,
+                            //         message:"can't find sender username with sender id" + err.message
+                            //     })
+                            // })
                         }).catch(err => {
                             res.send({
                                 success:false,
