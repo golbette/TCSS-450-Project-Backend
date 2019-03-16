@@ -98,15 +98,7 @@ router.post('/getmemberinfo', (req, res) => {
 router.post('/getcontacts', (req, res) => {
     let email = req.body['email'];
     db.one('select memberid from members where email=$1', [email]).then(row => {
-<<<<<<< HEAD
-
-
-        db.any(`select members.firstname, members.lastname, members.email, members.username from members where members.memberid = 
-        any (select memberid_b from contacts where memberid_a=$1 and verified = 1) or members.memberid = any (select memberid_a from contacts where memberid_b=$1 and verified = 1)`,
-         [row.memberid]).then(rows => {
-=======
         db.any('select members.memberid, members.firstname, members.lastname, members.email, members.username from members where members.memberid = any (select memberid_b from contacts where memberid_a=$1 and verified = 1) or members.memberid = any (select memberid_a from contacts where memberid_b=$1 and verified = 1)', [row.memberid]).then(rows => {
->>>>>>> master
             res.send({
                 success:true,
                 message:rows
