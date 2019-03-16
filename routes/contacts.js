@@ -260,7 +260,7 @@ router.post('/connReq',  (req, res) => {
                             console.log('receiverId: ' + receiverId + ' push token: ' + row.token);
                             db.one('select username from members where memberid = $1', [sender]).then(row=>{
                                 // msg_functions.sendToIndividual(row.token, '', row.username, REQUEST_ID); // This line is currently bugged. Will fix it later.
-                                db.none(`insert into notifications (email_a, email_b, notetype) values($1, $2, 'connreq')`, [email, receiver]).then(()=>{
+                                db.none(`insert into notifications (chatid, email_a, email_b, notetype) values(21, $1, $2, 'connreq')`, [email, receiver]).then(()=>{
                                     res.send({
                                         success:true,
                                         message:"notification sent"
