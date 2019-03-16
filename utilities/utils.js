@@ -5,13 +5,8 @@ let messaging = require('./pushy_services.js');
 //We use this create the SHA256 hash
 const crypto = require("crypto");
 
-async function sendEmail(from, receiver, subj, message) {
-  //research nodemailer for sending email from node.
-  // https://nodemailer.com/about/
-  // https://www.w3schools.com/nodejs/nodejs_email.asp
-  //create a burner gmail account 
-  //make sure you add the password to the environmental variables
-  //similar to the DATABASE_URL and PHISH_DOT_NET_KEY (later section of the lab)
+async function sendEmail(receiver, subj, message) {
+
 
   //fake sending an email for now. Post a message to logs. 
   console.log('Email sent: ' + message);
@@ -40,7 +35,7 @@ async function sendEmail(from, receiver, subj, message) {
         if (error) {
             console.log(error);
         } else {
-        console.log('Email sent: ' + info.response);
+            console.log('Email sent: ' + info.response);
         }
     }); 
 }
@@ -56,27 +51,49 @@ function getHash(pw, salt) {
 }
 
 async function sendRegistrationEmail(from, receiver, subj, message) {
-let finalMessage = (`<html> 
-<head>
-<style>
-body {background-color: black;}
-h1   {color: #310a31;}
-p    {color: #847996;}
-</style></head>
-<body> 
-                <div> 
-                <h1>Welcome to Blatherer!</h1>
-                <p>To get started chatting click the link to verify your account.</p>
-                <p> ${message}</p>
-                </div> 
-                </body>  
-                </html>`);
+    let finalMessage = (`<html> 
+    <head>
+    <style>
+    body {background-color: black;}
+    h1   {color: #310a31;}
+    p    {color: #847996;}
+    </style></head>
+    <body> 
+                    <div> 
+                    <h1>Welcome to Blatherer!</h1>
+                    <p>To get started chatting click the link to verify your account.</p>
+                    <p> ${message}</p>
+                    </div> 
+                    </body>  
+                    </html>`);
 
-      return await sendEmail(from, receiver, subj, finalMessage);
+    return await sendEmail(receiver, subj, finalMessage);
 }
 
 
+async function sendResetPasswordEmail(from, receiver, subj, message) {
+    let finalMessage = (`<html> 
+    <head>
+    <style>
+    body {background-color: black;}
+    h1   {color: #310a31;}
+    p    {color: #847996;}
+    </style></head>
+    <body> 
+                    <div> 
+                    <h1>Thanks for Using Blatherer!</h1>
+                    <p>This is your temporary password: </p>
+                    <p> ${message}</p>
+                    <p></p>
+                    <p>Please remember to change your password by using the Reset Password function in the App settings.</p>
+                    </div> 
+                    </body>  
+                    </html>`);
+    
+          return await sendEmail(receiver, subj, finalMessage);
+    }
+
 
 module.exports = { 
-    db, getHash, sendEmail, messaging, sendRegistrationEmail
+    db, getHash, sendEmail, messaging, sendRegistrationEmail, sendResetPasswordEmail
 };
