@@ -42,7 +42,7 @@ router.post('/searchcontacts', (req, res) => {
  */
 router.post('/getmemberinfo', (req, res) => {
     let email = req.body['email'];
-    db.one('select memberid, firstname, lastname, username from members where email=$1', [email]).then(row=>{
+    db.one('select memberid, firstname, lastname, username from members where email=$1', [email]).then(row => {
         res.send({
             success:true,
             message:row
